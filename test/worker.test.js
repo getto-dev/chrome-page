@@ -49,14 +49,14 @@ function requestLoad() {
   });
 }
 
-test("worker loads bookmark tree and detects the bookmarks bar", async () => {
+test("worker loads bookmark tree and detects the bookmarks bar", { concurrency: false }, async () => {
   const response = await requestLoad();
   assert.equal(response.success, true);
   assert.equal(response.data.bookmarksBarId, "1");
   assert.equal(response.data.tree[0].id, "0");
 });
 
-test("bookmark changes invalidate cache and broadcast an event", async () => {
+test("bookmark changes invalidate cache and broadcast an event", { concurrency: false }, async () => {
   sentMessages.length = 0;
   bookmarks.onChanged.emit("2", { title: "Changed" });
   assert.deepEqual(sentMessages, [{
@@ -65,7 +65,7 @@ test("bookmark changes invalidate cache and broadcast an event", async () => {
   }]);
 });
 
-test("import batches bookmark events into one refresh notification", async () => {
+test("import batches bookmark events into one refresh notification", { concurrency: false }, async () => {
   sentMessages.length = 0;
   bookmarks.onImportBegan.emit();
   bookmarks.onCreated.emit("3", { id: "3", parentId: "1", title: "A" });
@@ -73,10 +73,10 @@ test("import batches bookmark events into one refresh notification", async () =>
   bookmarks.onImportEnded.emit();
 
   await Promise.resolve();
-  assert.deepEqual(sentMessages, [{ type: "BOOKMARKS_REFRESH" }]);
+  assert.deepEqual(sentMessages, [{ type: "BOOKMARKS_REFRESH", data: null }]);
 });
 
-test("stale in-flight loads are discarded and retried after invalidation", async () => {
+test("stale in-flight loads are discarded and retried after invalidation", { concurrency: false }, async () => {
   sentMessages.length = 0;
 
   let calls = 0;
@@ -105,4 +105,9 @@ test("stale in-flight loads are discarded and retried after invalidation", async
   assert.equal(calls, 2);
   assert.equal(response.data.bookmarksBarId, "9");
   assert.equal(response.data.tree[0].children[0].id, "9");
+  bookmarks.getTree = async () => [{
+    id: "0",
+    children: [{ id: "1", folderType: "bookmarks-bar", children: [] }]
+  }];
+  sentMessages.length = 0;
 });
