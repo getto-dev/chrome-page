@@ -28,8 +28,11 @@ export function getFolderPath(map, folderId, rootId) {
 
   while (current && !visited.has(current.id)) {
     visited.add(current.id);
-    if (current.id === rootId) parts.push("Главная");
-    else parts.push(getTitle(current));
+    if (current.id === rootId) {
+      parts.push("Главная");
+      break;
+    }
+    parts.push(getTitle(current));
     current = current.parentId ? map.get(current.parentId) : null;
   }
 
