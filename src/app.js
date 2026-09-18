@@ -1,5 +1,8 @@
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "./settings.js";
-import { buildMap, createFallbackFavicon, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidHttpUrl } from "./bookmarks-utils.js";
+import { buildMap, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidHttpUrl } from "./bookmarks-utils.js";
+import { createIcon } from "./icons.js";
+import { attachFavicon } from "./favicon.js";
+import { getCurrentChildren } from "./search.js";
 
 const CARD_HEIGHT = { compact: 56, standard: 72, large: 88 };
 const state = {
@@ -7,21 +10,10 @@ const state = {
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
   destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0,
   menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
-  moveSourceId: null, moveDestinationId: null, settingsSaveTimer: 0
+  moveSourceId: null, moveDestinationId: null, settingsSaveTimer: 0, resizeObserver: null
 };
 
 const $ = id => document.getElementById(id);
-const ICON_NS = "http://www.w3.org/2000/svg";
-function createIcon(name, className = "icon") {
-  const svg = document.createElementNS(ICON_NS, "svg");
-  svg.setAttribute("class", className);
-  svg.setAttribute("aria-hidden", "true");
-  const use = document.createElementNS(ICON_NS, "use");
-  use.setAttribute("href", "#icon-" + name);
-  svg.appendChild(use);
-  return svg;
-}
-
 const dom = {
   html: document.documentElement, folderTree: $("folder-tree"),
   folderTitle: $("folder-title"), breadcrumbs: $("breadcrumbs"), bookmarks: $("bookmarks"),
@@ -46,39 +38,6 @@ function clampOpacity(value) {
 function hexToRgb(hex) {
   if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return "";
   return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)].join(", ");
-}
-
-function getSearchResults(query) {
-  const q = query.trim().toLocaleLowerCase();
-  if (!q) return [];
-  return [...state.map.values()]
-    .filter(node => Boolean(node.url))
-    .map(bookmark => {
-      const title = getTitle(bookmark).toLocaleLowerCase();
-      const url = String(bookmark.url || "").toLocaleLowerCase();
-      const hostname = getHostname(bookmark.url || "").toLocaleLowerCase();
-      const path = getFolderPath(state.map, bookmark.parentId, state.bookmarksBarId).toLocaleLowerCase();
-      const score = (title === q ? 0 : title.startsWith(q) ? 1 : title.includes(q) ? 2 : 3) + (hostname === q ? 0 : hostname.startsWith(q) ? 1 : 2);
-      return { bookmark, title, url, hostname, path, score };
-    })
-    .filter(entry => entry.title.includes(q) || entry.url.includes(q) || entry.hostname.includes(q) || entry.path.includes(q))
-    .sort((a, b) => a.score - b.score || a.title.localeCompare(b.title, undefined, { sensitivity: "base", numeric: true }))
-    .map(entry => entry.bookmark);
-}
-
-function sortChildren(children) {
-  const result = [...children];
-  if (state.settings.sortMode === "default") return result;
-  const compare = state.settings.sortMode === "name"
-    ? (a, b) => getTitle(a).localeCompare(getTitle(b), undefined, { sensitivity: "base", numeric: true })
-    : (a, b) => (b.dateAdded || 0) - (a.dateAdded || 0);
-  return [...result.filter(node => !node.url).sort(compare), ...result.filter(node => Boolean(node.url)).sort(compare)];
-}
-
-function getCurrentChildren() {
-  if (state.searchQuery) return getSearchResults(state.searchQuery);
-  const folder = state.map.get(state.currentFolderId);
-  return folder ? sortChildren(folder.children || []) : [];
 }
 
 function applyTheme() {
@@ -168,12 +127,15 @@ function renderBookmarks(force = false) {
 function createBookmarkCard(bookmark) {
   const card = dom.bookmarkTemplate.content.cloneNode(true).querySelector(".card");
   const link = card.querySelector(".card-link"); const more = card.querySelector(".more");
+  const meta = link.querySelector(".card-meta");
   const title = getTitle(bookmark); const url = typeof bookmark.url === "string" ? bookmark.url.trim() : "";
   const host = getHostname(url);
   card.dataset.bookmarkId = bookmark.id; card.dataset.itemId = bookmark.id;
   link.href = isValidHttpUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
   if (state.settings.openInNewTab) link.rel = "noopener noreferrer";
   link.querySelector(".card-title").textContent = title;
+  meta.textContent = state.searchQuery ? getFolderPath(state.map, bookmark.parentId, state.bookmarksBarId) : "";
+  meta.hidden = !state.searchQuery;
   more.setAttribute("aria-label", "Действия закладки «" + title + "»");
   attachFavicon(link.querySelector(".favicon"), url, host); return card;
 }
@@ -184,22 +146,9 @@ function createFolderCard(folder) {
   const title = getTitle(folder);
   card.dataset.folderId = folder.id; card.dataset.itemId = folder.id;
   button.querySelector(".card-title").textContent = title;
-  button.querySelector(".card-meta").textContent = String(folder.children?.length || 0) + " элементов";
   more.setAttribute("aria-label", "Действия папки «" + title + "»");
   if (folder.folderType) more.classList.add("hidden");
   return card;
-}
-
-function attachFavicon(container, url, host) {
-  container.replaceChildren();
-  if (!isValidHttpUrl(url)) { const fallback = document.createElement("span"); fallback.textContent = createFallbackFavicon(url); container.appendChild(fallback); return; }
-  const image = document.createElement("img"); image.alt = ""; image.loading = "lazy"; image.decoding = "async";
-  try {
-    const faviconUrl = new URL(chrome.runtime.getURL("_favicon/"));
-    faviconUrl.searchParams.set("pageUrl", url); faviconUrl.searchParams.set("size", "32"); image.src = faviconUrl.toString();
-  } catch { container.textContent = createFallbackFavicon(url); return; }
-  image.onerror = () => { const fallback = document.createElement("span"); fallback.textContent = createFallbackFavicon(url); container.replaceChildren(fallback); };
-  image.title = host || url; container.appendChild(image);
 }
 
 function folderTrail(folderId) {
@@ -285,7 +234,7 @@ function selectFolder(folderId) {
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
   dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = folderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(folderId));
-  state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0;
+  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
   renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
 
@@ -293,7 +242,7 @@ function showSearch(query) {
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
   dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
-  state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
+  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
 
 function showSettings(show) {
@@ -313,7 +262,7 @@ function showSettings(show) {
 
 async function persistSettings() {
   state.settings = await saveSettings(state.settings); applyTheme(); applyVisualSettings();
-  state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0; scheduleRender(true);
+  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0; scheduleRender(true);
 }
 
 function openInputDialog({ title, label, value = "", type = "text", validate }) {
@@ -443,7 +392,7 @@ function removeFromMap(id) {
 
 function rerenderAfterDataChange() {
   if (state.currentFolderId && !state.map.has(state.currentFolderId)) state.currentFolderId = state.bookmarksBarId;
-  renderSidebar(); state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0;
+  renderSidebar(); state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId));
   renderBreadcrumbs(); scheduleRender(true);
 }
@@ -474,7 +423,7 @@ async function refresh() {
     state.currentFolderId = previousFolder && state.map.has(previousFolder) ? previousFolder : state.bookmarksBarId;
     renderSidebar();
     state.searchQuery = previousSearch || ""; dom.search.value = state.searchQuery; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
-    state.children = getCurrentChildren();
+    state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId });
     dom.folderTitle.textContent = state.searchQuery ? "Поиск" : state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId));
     renderBreadcrumbs(); updateColumns(); renderBookmarks(true);
   })().catch(error => {
@@ -549,6 +498,9 @@ function setupEvents() {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); dom.search.focus(); dom.search.select(); }
   });
   dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
+  state.resizeObserver?.disconnect();
+  state.resizeObserver = new ResizeObserver(() => { updateColumns(); scheduleRender(true); });
+  state.resizeObserver.observe(dom.bookmarks);
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
     if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
@@ -557,5 +509,5 @@ function setupEvents() {
 }
 
 async function init() { state.settings = await loadSettings(); applyTheme(); applyVisualSettings(); setupEvents(); await refresh(); }
-window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearTimeout(state.settingsSaveTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); });
+window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearTimeout(state.settingsSaveTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
 void init().catch(error => console.error("Chrome Page init failed:", error));

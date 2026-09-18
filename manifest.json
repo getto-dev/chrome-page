@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Chrome Page",
   "version": "1.0.0",
-  "description": "Fast, glass-styled bookmark workspace for the Chrome new tab.",
+  "description": "Fast bookmark workspace for the Chrome new tab.",
   "permissions": ["bookmarks", "favicon", "storage"],
   "background": {
     "service_worker": "worker.js",
@@ -10,6 +10,11 @@
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png"
   },
   "action": {
     "default_title": "Chrome Page"

@@ -19,6 +19,10 @@
     <symbol id="icon-external" viewBox="0 0 24 24"><path d="M14 5h5v5M10 14l9-9M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/></symbol>
     <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></symbol>
     <symbol id="icon-clear" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16.5-.8 3.8 3.8-.8L18.4 8.1a2.8 2.8 0 0 0-4-4z"/><path d="m13.5 5.5 5 5"/></symbol>
+    <symbol id="icon-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></symbol>
+    <symbol id="icon-move" viewBox="0 0 24 24"><path d="M7 5v4M7 9H4l3 3M17 19v-4M17 15h3l-3-3M7 9h8a4 4 0 0 1 4 4v2M17 15H9a4 4 0 0 1-4-4V9"/></symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v6m4-6v6"/></symbol>
   </svg>
   <div class="ambient" aria-hidden="true">
     <span class="orb orb-a"></span>
@@ -51,7 +55,6 @@
         </div>
 
         <div class="header-actions">
-          <div class="header-status" aria-live="polite"><span id="header-mode-dot"></span><span>Обновления включены</span></div>
           <button id="manager-button" type="button" class="ghost-button"><svg class="icon" aria-hidden="true"><use href="#icon-external"></use></svg><span>Диспетчер</span></button>
         </div>
       </header>
@@ -101,10 +104,10 @@
   </div>
 
   <div id="menu" class="popup hidden" role="menu">
-    <button data-action="rename" role="menuitem">Переименовать</button>
-    <button data-action="edit" role="menuitem">Изменить URL</button>
-    <button data-action="move" role="menuitem">Переместить…</button>
-    <button data-action="delete" role="menuitem" class="danger">Удалить</button>
+    <button data-action="rename" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#icon-edit"></use></svg><span>Переименовать</span></button>
+    <button data-action="edit" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#icon-link"></use></svg><span>Изменить URL</span></button>
+    <button data-action="move" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#icon-move"></use></svg><span>Переместить…</span></button>
+    <button data-action="delete" role="menuitem" class="danger"><svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg><span>Удалить</span></button>
   </div>
 
   <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
@@ -128,11 +131,11 @@
   </div>
 
   <template id="bookmark-template">
-    <article class="card bookmark-card"><a class="card-link" href=""><span class="favicon"></span><span class="card-text"><strong class="card-title"></strong></span></a><button class="more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Действия"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
+    <article class="card bookmark-card"><a class="card-link" href=""><span class="favicon"></span><span class="card-text"><strong class="card-title"></strong><small class="card-meta" hidden></small></span></a><button class="more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Действия"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
   </template>
 
   <template id="folder-template">
-    <article class="card folder-card"><button class="card-link folder-link" type="button"><span class="favicon folder-icon"><svg class="icon" aria-hidden="true"><use href="#icon-folder"></use></svg></span><span class="card-text"><strong class="card-title"></strong><small class="card-meta"></small></span></button><button class="more" type="button" aria-label="Действия"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
+    <article class="card folder-card"><button class="card-link folder-link" type="button"><span class="favicon folder-icon"><svg class="icon" aria-hidden="true"><use href="#icon-folder"></use></svg></span><span class="card-text"><strong class="card-title"></strong></span></button><button class="more" type="button" aria-label="Действия"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
   </template>
 
   <script type="module" src="src/app.js"></script>
