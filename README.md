@@ -8,12 +8,12 @@ Chrome new-tab bookmark workspace combining the strongest ideas from `getto-dev/
 - Service worker for bookmark caching and delta synchronization
 - Vanilla JavaScript, no production dependencies
 - Glass / Frosted UI
-- Grid and Rows views
+- Плашки в 1–4 колонки
 - Global bookmark search with folder paths
 - Bookmark and folder management
 - Light / Dark / System themes
-- Auto / 2 / 3 / 4 columns
-- Card size, spacing, radius, blur and surface opacity settings
+- Auto / 2 / 3 / 4 columns for bookmark tiles
+- Tile size, spacing, radius, blur and surface opacity settings
 - Local SVG icons and favicon fallback
 - Virtualized bookmark rendering for large collections
 
