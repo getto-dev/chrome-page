@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "./settings.js";
 import { buildMap, createFallbackFavicon, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidHttpUrl } from "./bookmarks-utils.js";
 
-const CARD_HEIGHT = { compact: 58, standard: 76, large: 96 };
+const CARD_HEIGHT = { compact: 56, standard: 72, large: 88 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
@@ -15,7 +15,7 @@ const dom = {
   html: document.documentElement, total: $("bookmark-total"), folderTree: $("folder-tree"),
   folderTitle: $("folder-title"), breadcrumbs: $("breadcrumbs"), bookmarks: $("bookmarks"),
   bookmarkPanel: $("bookmark-panel"), settingsPanel: $("settings-panel"), search: $("search"),
-  searchClear: $("search-clear"), viewSwitch: $("view-switch"), settingsButton: $("settings-button"),
+  searchClear: $("search-clear"), settingsButton: $("settings-button"),
   themeButton: $("theme-button"), managerButton: $("manager-button"), ambientToggle: $("ambient-toggle"),
   opacity: $("opacity"), opacityValue: $("opacity-value"), backgroundColor: $("background-color"),
   resetBackground: $("reset-background"), newtabToggle: $("newtab-toggle"), menu: $("menu"),
@@ -73,7 +73,6 @@ function getCurrentChildren() {
 function applyTheme() { dom.html.dataset.theme = state.settings.theme; }
 
 function applyVisualSettings() {
-  dom.html.dataset.view = state.settings.view;
   dom.html.dataset.blur = state.settings.blur;
   dom.html.dataset.ambient = String(state.settings.ambient);
   dom.bookmarks.dataset.columns = String(state.settings.columns);
@@ -95,7 +94,6 @@ function applyVisualSettings() {
     const key = button.closest("[data-setting]")?.dataset.setting;
     button.classList.toggle("active", Boolean(key && String(state.settings[key]) === button.dataset.value));
   });
-  dom.viewSwitch.querySelectorAll("button").forEach(button => button.classList.toggle("active", button.dataset.view === state.settings.view));
 }
 
 function calculateColumns() {
@@ -107,7 +105,7 @@ function calculateColumns() {
   }
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(getComputedStyle(dom.bookmarks).columnGap) || 18;
-  const minWidth = state.settings.view === "rows" ? 280 : state.settings.cardSize === "compact" ? 180 : state.settings.cardSize === "large" ? 300 : 220;
+  const minWidth = state.settings.cardSize === "compact" ? 180 : state.settings.cardSize === "large" ? 300 : 220;
   return Math.max(1, Math.min(4, Math.floor((width + gap) / (minWidth + gap))));
 }
 
@@ -469,7 +467,6 @@ function setupEvents() {
 
   dom.search.addEventListener("input", event => showSearch(event.target.value));
   dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
-  dom.viewSwitch.addEventListener("click", event => { const button = event.target.closest("button[data-view]"); if (!button) return; state.settings.view = button.dataset.view; void persistSettings(); });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
   dom.themeButton.addEventListener("click", () => { state.settings.theme = state.settings.theme === "dark" ? "light" : "dark"; void persistSettings(); });
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
