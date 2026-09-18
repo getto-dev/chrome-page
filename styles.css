@@ -24,7 +24,7 @@
   --transition:.16s cubic-bezier(.22,.61,.36,1);
   --columns:3;
 }
-html[data-theme=dark{
+html[data-theme=dark]{
   --bg:8,10,15;
   --text:#f5f5f7;
   --muted:#a1a1aa;
@@ -182,11 +182,11 @@ html[data-view=grid] .card-title{width:100%;white-space:nowrap;-webkit-line-clam
 html[data-view=grid] .card-meta{width:100%}
 html[data-view=rows] .bookmark-card,html[data-view=rows] .folder-card{min-height:58px}
 html[data-view=rows] .card-link{padding-block:10px}
-html[data-size=compact] .card{border-radius:var(--radius)}
-html[data-view=grid][data-size=compact] .bookmark-card,html[data-view=grid][data-size=compact] .folder-card{min-height:96px}
-html[data-view=grid][data-size=large] .bookmark-card,html[data-view=grid][data-size=large] .folder-card{min-height:148px}
-html[data-view=grid][data-size=large] .favicon{width:58px;height:58px}
-html[data-view=grid][data-size=large] .card-title{font-size:14.5px}
+html .bookmarks[data-size=compact] .card{border-radius:var(--radius)}
+html[data-view=grid] .bookmarks[data-size=compact] .bookmark-card,html[data-view=grid] .bookmarks[data-size=compact] .folder-card{min-height:96px}
+html[data-view=grid] .bookmarks[data-size=large] .bookmark-card,html[data-view=grid] .bookmarks[data-size=large] .folder-card{min-height:148px}
+html[data-view=grid] .bookmarks[data-size=large] .favicon{width:58px;height:58px}
+html[data-view=grid] .bookmarks[data-size=large] .card-title{font-size:14.5px}
 
 .empty-message{grid-column:1/-1;display:grid;place-items:center;min-height:240px;padding:36px;border:1px dashed var(--border-strong);border-radius:20px;background:rgba(var(--surface),.28);color:var(--muted);font-size:13px;text-align:center}
 
