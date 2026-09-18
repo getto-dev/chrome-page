@@ -1,0 +1,13 @@
+{
+  "name": "chrome-page",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "test:e2e": "playwright test tests/e2e.spec.js --reporter=line"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
