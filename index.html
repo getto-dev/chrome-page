@@ -22,12 +22,13 @@
       </header>
 
       <label class="search search-sidebar">
-        <span aria-hidden="true">⌕</span>
+        <span class="search-icon" aria-hidden="true">⌕</span>
         <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Поиск закладок…" aria-label="Поиск закладок">
+        <kbd class="search-kbd" aria-hidden="true">⌘K</kbd>
         <button id="search-clear" type="button" class="clear hidden" aria-label="Очистить поиск">×</button>
       </label>
 
-      <div class="sidebar-label">Папки</div>
+      <div class="sidebar-label"><span>Места</span><span class="sidebar-label-line"></span></div>
       <nav id="folder-tree" class="folder-tree"></nav>
 
       <footer class="sidebar-footer">
@@ -44,11 +45,12 @@
         </div>
 
         <div class="header-actions">
+          <div class="header-status" aria-live="polite"><span id="header-mode-dot"></span><span>Закладки синхронизированы</span></div>
           <div id="view-switch" class="segmented" role="group" aria-label="Вид">
             <button type="button" data-view="grid" class="active">Сетка</button>
             <button type="button" data-view="rows">Плашки</button>
           </div>
-          <button id="manager-button" type="button" class="ghost-button">Диспетчер</button>
+          <button id="manager-button" type="button" class="ghost-button"><span aria-hidden="true">↗</span><span>Диспетчер</span></button>
         </div>
       </header>
 
@@ -58,7 +60,7 @@
 
       <section id="settings-panel" class="settings-panel hidden" aria-label="Настройки">
         <div class="settings-card">
-          <div class="settings-head"><div><h2>Настройки</h2><p>Вид, стекло и поведение Chrome Page.</p></div></div>
+          <div class="settings-head"><div><span class="eyebrow">Chrome Page</span><h2>Настройки</h2><p>Настрой рабочее пространство под свой способ работы.</p></div></div>
 
           <div class="setting-section">
             <h3>Тема</h3>
@@ -83,13 +85,13 @@
           </div>
 
           <div class="setting-section"><h3>Стекло</h3>
-            <label class="toggle-row"><span>Ambient-свечение</span><input id="ambient-toggle" type="checkbox"></label>
+            <label class="toggle-row"><span><strong>Ambient-свечение</strong><small>Мягкие фоновые сферы под стеклом</small></span><input id="ambient-toggle" type="checkbox"></label>
             <label class="range-row"><span>Прозрачность поверхности</span><input id="opacity" type="range" min="55" max="100" step="5"><output id="opacity-value">78%</output></label>
             <label class="color-row"><span>Цвет фона</span><input id="background-color" type="color"><button id="reset-background" type="button">Сбросить</button></label>
           </div>
 
           <div class="setting-section"><h3>Поведение</h3>
-            <label class="toggle-row"><span>Открывать ссылки в новой вкладке</span><input id="newtab-toggle" type="checkbox"></label>
+            <label class="toggle-row"><span><strong>Открывать ссылки в новой вкладке</strong><small>Сохранять Chrome Page открытым</small></span><input id="newtab-toggle" type="checkbox"></label>
           </div>
         </div>
       </section>
