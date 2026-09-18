@@ -66,6 +66,14 @@ test("Chrome Page boots and manages bookmark changes", async () => {
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-columns", "2");
     await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
 
+    await page.locator('[data-setting="blur"] button[data-value="soft"]').click();
+    await expect(page.locator("html")).toHaveAttribute("data-blur", "soft");
+    await expect(page.locator("html").evaluate(el => getComputedStyle(el).getPropertyValue("--blur").trim())).toBe("12px");
+
+    await page.locator("#opacity").fill("65");
+    await expect(page.locator("#opacity-value")).toHaveText("65%");
+    await expect(page.locator("html").evaluate(el => getComputedStyle(el).getPropertyValue("--alpha").trim())).toBe("0.65");
+
     await page.locator('[data-setting="cardSize"] button[data-value="large"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-size", "large");
     await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("height", "88px");
