@@ -75,3 +75,34 @@ test("import batches bookmark events into one refresh notification", async () =>
   await Promise.resolve();
   assert.deepEqual(sentMessages, [{ type: "BOOKMARKS_REFRESH" }]);
 });
+
+test("stale in-flight loads are discarded and retried after invalidation", async () => {
+  sentMessages.length = 0;
+
+  let calls = 0;
+  let resolveFirst;
+  bookmarks.getTree = () => {
+    calls += 1;
+    if (calls === 1) {
+      return new Promise(resolve => { resolveFirst = resolve; });
+    }
+    return Promise.resolve([{
+      id: "0",
+      children: [{ id: "9", folderType: "bookmarks-bar", children: [] }]
+    }]);
+  };
+
+  const pending = requestLoad();
+  await Promise.resolve();
+
+  bookmarks.onChanged.emit("9", { title: "Invalidates in-flight load" });
+  resolveFirst([{
+    id: "0",
+    children: [{ id: "1", folderType: "bookmarks-bar", children: [] }]
+  }]);
+
+  const response = await pending;
+  assert.equal(calls, 2);
+  assert.equal(response.data.bookmarksBarId, "9");
+  assert.equal(response.data.tree[0].children[0].id, "9");
+});
