@@ -232,7 +232,7 @@ function folderDepth(folderId) {
 function renderSidebar() {
   dom.folderTree.replaceChildren();
 
-  const addSpecial = (folder, label, icon = "●") => {
+  const addSpecial = (folder, label, icon = "folder") => {
     if (!folder) return;
     const row = document.createElement("div");
     row.className = "folder-row";
