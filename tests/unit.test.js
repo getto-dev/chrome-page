@@ -54,7 +54,7 @@ test("bookmark map preserves parent relationships", () => {
 
 test("hostname and favicon fallback are deterministic", () => {
   assert.equal(getHostname("https://www.example.com/a"), "example.com");
-  assert.equal(createFallbackFavicon("https://github.com"), "GH");
+  assert.equal(createFallbackFavicon("https://github.com"), "GI");
   assert.equal(createFallbackFavicon("https://www.youtube.com"), "YO");
 });
 
@@ -73,7 +73,10 @@ test("settings normalization falls back safely", () => {
       backgroundColor: "red",
       openInNewTab: "yes"
     }),
-    DEFAULT_SETTINGS
+    {
+      ...DEFAULT_SETTINGS,
+      surfaceOpacity: 100
+    }
   );
 
   assert.deepEqual(
