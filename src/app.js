@@ -11,8 +11,19 @@ const state = {
 };
 
 const $ = id => document.getElementById(id);
+const ICON_NS = "http://www.w3.org/2000/svg";
+function createIcon(name, className = "icon") {
+  const svg = document.createElementNS(ICON_NS, "svg");
+  svg.setAttribute("class", className);
+  svg.setAttribute("aria-hidden", "true");
+  const use = document.createElementNS(ICON_NS, "use");
+  use.setAttribute("href", "#icon-" + name);
+  svg.appendChild(use);
+  return svg;
+}
+
 const dom = {
-  html: document.documentElement, total: $("bookmark-total"), folderTree: $("folder-tree"),
+  html: document.documentElement, folderTree: $("folder-tree"),
   folderTitle: $("folder-title"), breadcrumbs: $("breadcrumbs"), bookmarks: $("bookmarks"),
   bookmarkPanel: $("bookmark-panel"), settingsPanel: $("settings-panel"), search: $("search"),
   searchClear: $("search-clear"), settingsButton: $("settings-button"),
@@ -233,9 +244,7 @@ function renderSidebar() {
       button.classList.add("active");
       button.setAttribute("aria-current", "page");
     }
-    const iconNode = document.createElement("span");
-    iconNode.textContent = icon;
-    iconNode.setAttribute("aria-hidden", "true");
+    const iconNode = createIcon(icon);
     const name = document.createElement("span");
     name.className = "folder-name";
     name.textContent = label;
@@ -252,9 +261,9 @@ function renderSidebar() {
   const other = root?.children?.find(node => node.folderType === "other");
   const mobile = root?.children?.find(node => node.folderType === "mobile");
 
-  addSpecial(bar, "Главная", "★");
-  addSpecial(other, "Другие закладки", "●");
-  addSpecial(mobile, "Мобильные", "▣");
+  addSpecial(bar, "Главная", "home");
+  addSpecial(other, "Другие закладки", "bookmark");
+  addSpecial(mobile, "Мобильные", "mobile");
 
   const roots = bar?.children?.filter(node => !node.url) || [];
 
@@ -266,12 +275,12 @@ function renderSidebar() {
       button.classList.add("active");
       button.setAttribute("aria-current", "page");
     }
-    const icon = document.createElement("span"); icon.textContent = "▰"; icon.setAttribute("aria-hidden", "true");
+    const icon = createIcon("folder");
     const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
     const count = document.createElement("span"); count.className = "folder-count"; count.textContent = String(folder.children?.length || 0);
     button.append(icon, name, count); row.appendChild(button);
     const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.textContent = "⋯"; row.appendChild(more); dom.folderTree.appendChild(row);
+    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
     for (const child of folder.children || []) if (!child.url) addFolder(child);
   }
   roots.forEach(addFolder);
