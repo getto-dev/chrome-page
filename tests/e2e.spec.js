@@ -53,6 +53,10 @@ test("Chrome Page boots and manages bookmark changes", async () => {
     await expect(page.getByRole("link", { name: "Example" })).toHaveAttribute("href", "https://example.com/");
 
     await page.locator('.bookmark-card[data-bookmark-id="' + bookmarkId + '"] .more').click();
+    await expect(page.locator('#menu [data-action="rename"] .icon use')).toHaveAttribute("href", "#icon-edit");
+    await expect(page.locator('#menu [data-action="edit"] .icon use')).toHaveAttribute("href", "#icon-link");
+    await expect(page.locator('#menu [data-action="move"] .icon use')).toHaveAttribute("href", "#icon-move");
+    await expect(page.locator('#menu [data-action="delete"] .icon use')).toHaveAttribute("href", "#icon-trash");
     await page.locator('#menu [data-action="rename"]').click();
     await page.locator("#dialog-input").fill("Example Renamed");
     await page.locator("#dialog-submit").click();
@@ -61,6 +65,7 @@ test("Chrome Page boots and manages bookmark changes", async () => {
     await page.locator("#search").fill("example.com");
     await expect(page.locator('.bookmark-card[data-bookmark-id="' + bookmarkId + '"]')).toHaveCount(1);
     await expect(page.locator('.bookmark-card[data-bookmark-id="' + bookmarkId + '"] .card-meta')).toHaveText("Главная / Chrome Page E2E");
+    await expect(page.locator(".folder-card .card-meta")).toHaveCount(0);
 
     await page.getByRole("button", { name: "Настройки" }).click();
     await expect(page.locator("#settings-panel")).toBeVisible();
