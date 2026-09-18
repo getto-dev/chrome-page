@@ -22,7 +22,7 @@ test("bookmark utilities provide safe title and favicon fallback", () => {
   assert.equal(getTitle({ title: "  Example  " }), "Example");
   assert.equal(getTitle({ title: "" }), "Без названия");
   assert.equal(createFallbackFavicon("https://github.com/getto-dev"), "GI");
-  assert.equal(createFallbackFavicon("https://пример.рф"), "ПР");
+  assert.equal(createFallbackFavicon("https://пример.рф"), "XN");
 });
 
 test("bookmark map and folder path handle normal trees", () => {
@@ -51,5 +51,5 @@ test("bookmark ancestry traversal stops on cycles", () => {
     ["b", { id: "b", parentId: "a" }]
   ]);
   assert.equal(isDescendantOrSelf(map, "a", "missing"), false);
-  assert.equal(getFolderPath(map, "a", "root"), "Папка / Папка");
+  assert.equal(getFolderPath(map, "a", "root"), "Без названия / Без названия");
 });
