@@ -270,20 +270,13 @@ html[data-ambient=false] .ambient{display:none}
 }
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:scale(.995)}
-.folder-button>.icon{width:16px;height:16px;color:currentColor;opacity:.66}
+.folder-button>.icon{width:18px;height:18px;color:currentColor;opacity:.7}
 .folder-name{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:12.5px;
-  font-weight:570;
-}
-.folder-count{
-  margin-left:auto;
-  flex:none;
-  font-size:10px;
-  color:var(--muted-2);
-  font-variant-numeric:tabular-nums;
+  font-size:13.5px;
+  font-weight:590;
 }
 .folder-button.active{
   background:var(--active);
@@ -292,7 +285,6 @@ html[data-ambient=false] .ambient{display:none}
 }
 .folder-button.active::before{background:var(--accent)}
 .folder-button.active>.icon{opacity:.92}
-.folder-button.active .folder-count{color:inherit;opacity:.65}
 .folder-row>.more{opacity:0}
 .folder-row:hover>.more,.folder-row>.more:focus-visible{opacity:1}
 
