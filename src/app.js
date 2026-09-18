@@ -279,6 +279,7 @@ function renderSidebar() {
 function selectFolder(folderId) {
   if (!state.map.has(folderId)) return;
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
+  dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = folderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(folderId));
   state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0;
   renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
@@ -286,6 +287,7 @@ function selectFolder(folderId) {
 
 function showSearch(query) {
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
+  dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
   state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
