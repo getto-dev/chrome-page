@@ -490,7 +490,7 @@ html[data-ambient=false] .ambient{display:none}
   font-weight:620;
   letter-spacing:-.012em;
 }
- .card-meta{
+.card-meta{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -652,7 +652,7 @@ html[data-ambient=false] .ambient{display:none}
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
 }
- .popup button{
+.popup button{
   display:flex;
   align-items:center;
   gap:9px;
