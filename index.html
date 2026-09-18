@@ -81,9 +81,9 @@
           <div class="setting-grid">
             <div class="setting-section"><h3>Колонки</h3><div class="options" data-setting="columns"><button data-value="auto" aria-pressed="false">Авто</button><button data-value="2" aria-pressed="false">2</button><button data-value="3" aria-pressed="false">3</button><button data-value="4" aria-pressed="false">4</button></div></div>
             <div class="setting-section"><h3>Размер</h3><div class="options" data-setting="cardSize"><button data-value="compact" aria-pressed="false">Малый</button><button data-value="standard" aria-pressed="false">Средний</button><button data-value="large" aria-pressed="false">Большой</button></div></div>
-            <div class="setting-section"><h3>Отступы</h3><div class="options" data-setting="spacing"><button data-value="compact">Малые</button><button data-value="standard">Средние</button><button data-value="large">Большие</button></div></div>
-            <div class="setting-section"><h3>Радиусы</h3><div class="options" data-setting="radius"><button data-value="sharp">Прямые</button><button data-value="soft">Мягкие</button><button data-value="round">Скруглённые</button></div></div>
-            <div class="setting-section"><h3>Размытие</h3><div class="options" data-setting="blur"><button data-value="soft">Мягкий</button><button data-value="strong">Сильный</button></div></div>
+            <div class="setting-section"><h3>Отступы</h3><div class="options" data-setting="spacing"><button data-value="compact" aria-pressed="false">Малые</button><button data-value="standard" aria-pressed="false">Средние</button><button data-value="large" aria-pressed="false">Большие</button></div></div>
+            <div class="setting-section"><h3>Радиусы</h3><div class="options" data-setting="radius"><button data-value="sharp" aria-pressed="false">Прямые</button><button data-value="soft" aria-pressed="false">Мягкие</button><button data-value="round" aria-pressed="false">Скруглённые</button></div></div>
+            <div class="setting-section"><h3>Размытие</h3><div class="options" data-setting="blur"><button data-value="soft" aria-pressed="false">Мягкий</button><button data-value="strong" aria-pressed="false">Сильный</button></div></div>
           </div>
 
           <div class="setting-section"><h3>Стекло</h3>
@@ -107,7 +107,7 @@
     <button data-action="delete" role="menuitem" class="danger"><svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg><span>Удалить</span></button>
   </div>
 
-  <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+  <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-message">
     <div class="dialog">
       <h2 id="dialog-title"></h2>
       <p id="dialog-message"></p>
@@ -117,7 +117,7 @@
     </div>
   </div>
 
-  <div id="move-dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="move-title">
+  <div id="move-dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="move-title" aria-describedby="move-item">
     <div class="dialog move-dialog">
       <h2 id="move-title">Переместить</h2>
       <p id="move-item"></p>
