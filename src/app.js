@@ -19,7 +19,7 @@ const dom = {
   folderTitle: $("folder-title"), breadcrumbs: $("breadcrumbs"), bookmarks: $("bookmarks"),
   bookmarkPanel: $("bookmark-panel"), settingsPanel: $("settings-panel"), search: $("search"),
   searchClear: $("search-clear"), settingsButton: $("settings-button"),
-  themeButton: $("theme-button"), managerButton: $("manager-button"), ambientToggle: $("ambient-toggle"),
+  managerButton: $("manager-button"), ambientToggle: $("ambient-toggle"),
   opacity: $("opacity"), opacityValue: $("opacity-value"), backgroundColor: $("background-color"),
   resetBackground: $("reset-background"), newtabToggle: $("newtab-toggle"), menu: $("menu"),
   dialog: $("dialog"), dialogTitle: $("dialog-title"), dialogMessage: $("dialog-message"),
@@ -42,7 +42,6 @@ function hexToRgb(hex) {
 
 function applyTheme() {
   dom.html.dataset.theme = state.settings.theme;
-  dom.themeButton.title = "Тема: " + ({ system: "системная", light: "светлая", dark: "тёмная" }[state.settings.theme] || state.settings.theme);
 }
 
 function applyVisualSettings() {
@@ -465,12 +464,6 @@ function setupEvents() {
   dom.search.addEventListener("input", event => showSearch(event.target.value));
   dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
-  dom.themeButton.addEventListener("click", () => {
-    const themes = ["system", "light", "dark"];
-    const index = themes.indexOf(state.settings.theme);
-    state.settings.theme = themes[(index + 1) % themes.length];
-    void persistSettings();
-  });
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
   dom.ambientToggle.addEventListener("change", e => { state.settings.ambient = e.target.checked; void persistSettings(); });
   dom.opacity.addEventListener("input", e => { state.settings.surfaceOpacity = clampOpacity(e.target.value); applyVisualSettings(); clearTimeout(state.settingsSaveTimer); state.settingsSaveTimer = setTimeout(() => void saveSettings(state.settings), 120); });
