@@ -170,7 +170,9 @@ function createFolderCard(folder) {
   card.dataset.folderId = folder.id; card.dataset.itemId = folder.id;
   button.querySelector(".card-title").textContent = title;
   button.querySelector(".card-meta").textContent = String(folder.children?.length || 0) + " элементов";
-  more.setAttribute("aria-label", "Действия папки «" + title + "»"); return card;
+  more.setAttribute("aria-label", "Действия папки «" + title + "»");
+  if (folder.folderType) more.classList.add("hidden");
+  return card;
 }
 
 function attachFavicon(container, url, host) {
@@ -212,8 +214,41 @@ function folderDepth(folderId) {
 
 function renderSidebar() {
   dom.folderTree.replaceChildren();
+
+  const addSpecial = (folder, label, icon = "●") => {
+    if (!folder) return;
+    const row = document.createElement("div");
+    row.className = "folder-row";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "folder-button";
+    button.dataset.folderId = folder.id;
+    if (folder.id === state.currentFolderId && !state.searchQuery) button.classList.add("active");
+    const iconNode = document.createElement("span");
+    iconNode.textContent = icon;
+    iconNode.setAttribute("aria-hidden", "true");
+    const name = document.createElement("span");
+    name.className = "folder-name";
+    name.textContent = label;
+    const count = document.createElement("span");
+    count.className = "folder-count";
+    count.textContent = String(folder.children?.length || 0);
+    button.append(iconNode, name, count);
+    row.appendChild(button);
+    dom.folderTree.appendChild(row);
+  };
+
+  const root = state.map.get(state.rootId);
   const bar = state.map.get(state.bookmarksBarId);
+  const other = root?.children?.find(node => node.folderType === "other");
+  const mobile = root?.children?.find(node => node.folderType === "mobile");
+
+  addSpecial(bar, "Главная", "★");
+  addSpecial(other, "Другие закладки", "●");
+  addSpecial(mobile, "Мобильные", "▣");
+
   const roots = bar?.children?.filter(node => !node.url) || [];
+
   function addFolder(folder) {
     const row = document.createElement("div"); row.className = "folder-row";
     const button = document.createElement("button"); button.type = "button"; button.className = "folder-button"; button.dataset.folderId = folder.id;
@@ -304,7 +339,10 @@ function renderMoveFolders() {
 
 function openMoveDialog(sourceId) {
   const source = state.map.get(sourceId); if (!source) return;
-  state.moveSourceId = sourceId; state.moveDestinationId = source.parentId || null; dom.moveItem.textContent = getTitle(source); dom.moveSearch.value = "";
+  state.moveSourceId = sourceId;
+  state.moveDestinationId = null;
+  dom.moveItem.textContent = getTitle(source);
+  dom.moveSearch.value = "";
   renderMoveFolders(); dom.moveDialog.classList.remove("hidden"); requestAnimationFrame(() => dom.moveSearch.focus());
 }
 
