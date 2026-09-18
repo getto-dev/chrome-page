@@ -247,10 +247,7 @@ function renderSidebar() {
     const name = document.createElement("span");
     name.className = "folder-name";
     name.textContent = label;
-    const count = document.createElement("span");
-    count.className = "folder-count";
-    count.textContent = String(folder.children?.length || 0);
-    button.append(iconNode, name, count);
+    button.append(iconNode, name);
     row.appendChild(button);
     dom.folderTree.appendChild(row);
   };
@@ -276,11 +273,9 @@ function renderSidebar() {
     }
     const icon = createIcon("folder");
     const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
-    const count = document.createElement("span"); count.className = "folder-count"; count.textContent = String(folder.children?.length || 0);
-    button.append(icon, name, count); row.appendChild(button);
+    button.append(icon, name); row.appendChild(button);
     const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
-    for (const child of folder.children || []) if (!child.url) addFolder(child);
   }
   roots.forEach(addFolder);
   if (!roots.length) { const empty = document.createElement("div"); empty.className = "folder-name"; empty.style.padding = "12px 10px"; empty.style.color = "var(--muted)"; empty.textContent = "Папок пока нет"; dom.folderTree.appendChild(empty); }
