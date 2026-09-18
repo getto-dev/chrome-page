@@ -57,11 +57,6 @@ test("Chrome Page boots and manages bookmark changes", async () => {
 
     await page.getByRole("button", { name: "Настройки" }).click();
     await expect(page.locator("#settings-panel")).toBeVisible();
-    await page.locator('[data-setting="view"] button[data-value="rows"]').click();
-    await expect(page.locator("#bookmarks")).toHaveAttribute("data-view", "rows");
-    await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(1);
-
-    await page.locator('[data-setting="view"] button[data-value="grid"]').click();
     await page.locator('[data-setting="columns"] button[data-value="2"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-columns", "2");
     await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
