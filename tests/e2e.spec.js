@@ -57,9 +57,22 @@ test("Chrome Page boots and manages bookmark changes", async () => {
 
     await page.getByRole("button", { name: "Настройки" }).click();
     await expect(page.locator("#settings-panel")).toBeVisible();
+    await page.locator('[data-setting="view"] button[data-value="rows"]').click();
+    await expect(page.locator("#bookmarks")).toHaveAttribute("data-view", "rows");
+    await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(1);
+
+    await page.locator('[data-setting="view"] button[data-value="grid"]').click();
     await page.locator('[data-setting="columns"] button[data-value="2"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-columns", "2");
     await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
+
+    await page.locator('[data-setting="blur"] button[data-value="soft"]').click();
+    await expect(page.locator("html")).toHaveAttribute("data-blur", "soft");
+    await expect(page.locator("html").evaluate(el => getComputedStyle(el).getPropertyValue("--blur").trim())).toBe("12px");
+
+    await page.locator("#opacity").fill("65");
+    await expect(page.locator("#opacity-value")).toHaveText("65%");
+    await expect(page.locator("html").evaluate(el => getComputedStyle(el).getPropertyValue("--alpha").trim())).toBe("0.65");
 
     await page.locator('[data-setting="cardSize"] button[data-value="large"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-size", "large");

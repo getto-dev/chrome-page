@@ -18,13 +18,13 @@
     <aside class="sidebar" aria-label="Навигация по закладкам">
       <header class="brand-row">
         <div class="brand"><span class="brand-mark">✦</span><span>Chrome Page</span></div>
-        <span id="bookmark-total" class="badge">0</span>
+        <span id="bookmark-total" class="badge" title="Всего закладок" aria-label="Всего закладок">0</span>
       </header>
 
       <label class="search search-sidebar">
         <span class="search-icon" aria-hidden="true">⌕</span>
         <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Поиск закладок…" aria-label="Поиск закладок">
-        <kbd class="search-kbd" aria-hidden="true">Ctrl K</kbd>
+        <kbd id="search-kbd" class="search-kbd" aria-hidden="true">Ctrl K</kbd>
         <button id="search-clear" type="button" class="clear hidden" aria-label="Очистить поиск">×</button>
       </label>
 
@@ -45,13 +45,13 @@
         </div>
 
         <div class="header-actions">
-          <div class="header-status" aria-live="polite"><span id="header-mode-dot"></span><span>Закладки синхронизированы</span></div>
+          <div class="header-status" aria-live="polite"><span id="header-mode-dot"></span><span>Обновления включены</span></div>
           <button id="manager-button" type="button" class="ghost-button"><span aria-hidden="true">↗</span><span>Диспетчер</span></button>
         </div>
       </header>
 
       <section id="bookmark-panel" class="content-panel">
-        <div id="bookmarks" class="bookmarks" data-columns="auto" data-size="standard" data-spacing="standard" data-radius="round"></div>
+        <div id="bookmarks" class="bookmarks" data-view="grid" data-columns="auto" data-size="standard" data-spacing="standard" data-radius="round"></div>
       </section>
 
       <section id="settings-panel" class="settings-panel hidden" aria-label="Настройки">
@@ -61,27 +61,34 @@
           <div class="setting-section">
             <h3>Тема</h3>
             <div class="options" data-setting="theme">
-              <button data-value="system">Система</button><button data-value="light">Светлая</button><button data-value="dark">Тёмная</button>
+              <button data-value="system" aria-pressed="false">Система</button><button data-value="light" aria-pressed="false">Светлая</button><button data-value="dark" aria-pressed="false">Тёмная</button>
+            </div>
+          </div>
+
+          <div class="setting-section">
+            <h3>Вид</h3>
+            <div class="options" data-setting="view">
+              <button data-value="grid" aria-pressed="false">Плитка</button><button data-value="rows" aria-pressed="false">Список</button>
             </div>
           </div>
 
           <div class="setting-section">
             <h3>Сортировка</h3>
             <div class="options" data-setting="sortMode">
-              <button data-value="default">Порядок Chrome</button><button data-value="name">По имени</button><button data-value="date">По дате</button>
+              <button data-value="default" aria-pressed="false">Порядок Chrome</button><button data-value="name" aria-pressed="false">По имени</button><button data-value="date" aria-pressed="false">По дате</button>
             </div>
           </div>
 
           <div class="setting-grid">
-            <div class="setting-section"><h3>Колонки</h3><div class="options" data-setting="columns"><button data-value="auto">Авто</button><button data-value="2">2</button><button data-value="3">3</button><button data-value="4">4</button></div></div>
-            <div class="setting-section"><h3>Размер</h3><div class="options" data-setting="cardSize"><button data-value="compact">Малый</button><button data-value="standard">Средний</button><button data-value="large">Большой</button></div></div>
+            <div class="setting-section"><h3>Колонки</h3><div class="options" data-setting="columns"><button data-value="auto" aria-pressed="false">Авто</button><button data-value="2" aria-pressed="false">2</button><button data-value="3" aria-pressed="false">3</button><button data-value="4" aria-pressed="false">4</button></div></div>
+            <div class="setting-section"><h3>Размер</h3><div class="options" data-setting="cardSize"><button data-value="compact" aria-pressed="false">Малый</button><button data-value="standard" aria-pressed="false">Средний</button><button data-value="large" aria-pressed="false">Большой</button></div></div>
             <div class="setting-section"><h3>Отступы</h3><div class="options" data-setting="spacing"><button data-value="compact">Малые</button><button data-value="standard">Средние</button><button data-value="large">Большие</button></div></div>
             <div class="setting-section"><h3>Радиусы</h3><div class="options" data-setting="radius"><button data-value="sharp">Прямые</button><button data-value="soft">Мягкие</button><button data-value="round">Скруглённые</button></div></div>
-            <div class="setting-section"><h3>Blur</h3><div class="options" data-setting="blur"><button data-value="soft">Мягкий</button><button data-value="strong">Сильный</button></div></div>
+            <div class="setting-section"><h3>Размытие</h3><div class="options" data-setting="blur"><button data-value="soft">Мягкий</button><button data-value="strong">Сильный</button></div></div>
           </div>
 
           <div class="setting-section"><h3>Стекло</h3>
-            <label class="toggle-row"><span><strong>Ambient-свечение</strong><small>Мягкие фоновые сферы под стеклом</small></span><input id="ambient-toggle" type="checkbox"></label>
+            <label class="toggle-row"><span><strong>Фоновое свечение</strong><small>Мягкие цветные сферы под стеклом</small></span><input id="ambient-toggle" type="checkbox"></label>
             <label class="range-row"><span>Прозрачность поверхности</span><input id="opacity" type="range" min="55" max="100" step="5"><output id="opacity-value">78%</output></label>
             <label class="color-row"><span>Цвет фона</span><input id="background-color" type="color"><button id="reset-background" type="button">Сбросить</button></label>
           </div>
@@ -122,7 +129,7 @@
   </div>
 
   <template id="bookmark-template">
-    <article class="card bookmark-card"><a class="card-link" href=""><span class="favicon"></span><span class="card-text"><strong class="card-title"></strong><small class="card-meta"></small></span></a><button class="more" type="button" aria-label="Действия">⋯</button></article>
+    <article class="card bookmark-card"><a class="card-link" href=""><span class="favicon"></span><span class="card-text"><strong class="card-title"></strong><small class="card-meta"></small></span></a><button class="more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Действия">⋯</button></article>
   </template>
 
   <template id="folder-template">

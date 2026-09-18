@@ -6,7 +6,7 @@ const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
   destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0,
-  menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null,
+  menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
   moveSourceId: null, moveDestinationId: null, settingsSaveTimer: 0
 };
 
@@ -70,11 +70,16 @@ function getCurrentChildren() {
   return folder ? sortChildren(folder.children || []) : [];
 }
 
-function applyTheme() { dom.html.dataset.theme = state.settings.theme; }
+function applyTheme() {
+  dom.html.dataset.theme = state.settings.theme;
+  dom.themeButton.title = "Тема: " + ({ system: "системная", light: "светлая", dark: "тёмная" }[state.settings.theme] || state.settings.theme);
+}
 
 function applyVisualSettings() {
   dom.html.dataset.blur = state.settings.blur;
   dom.html.dataset.ambient = String(state.settings.ambient);
+  dom.html.style.setProperty("--alpha", String(state.settings.surfaceOpacity / 100));
+  dom.bookmarks.dataset.view = state.settings.view;
   dom.bookmarks.dataset.columns = String(state.settings.columns);
   dom.bookmarks.dataset.size = state.settings.cardSize;
   dom.bookmarks.dataset.spacing = state.settings.spacing;
@@ -88,12 +93,17 @@ function applyVisualSettings() {
     dom.backgroundColor.value = state.settings.backgroundColor;
   } else {
     dom.html.style.removeProperty("--bg");
-    dom.backgroundColor.value = "#f5f5f7";
+    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+    dom.backgroundColor.value = prefersDark || state.settings.theme === "dark" ? "#080a0f" : "#f5f5f7";
   }
   document.querySelectorAll("[data-setting] button").forEach(button => {
     const key = button.closest("[data-setting]")?.dataset.setting;
-    button.classList.toggle("active", Boolean(key && String(state.settings[key]) === button.dataset.value));
+    const active = Boolean(key && String(state.settings[key]) === button.dataset.value);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
   });
+  const searchKbd = $("search-kbd");
+  if (searchKbd) searchKbd.textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ K" : "Ctrl K";
 }
 
 function calculateColumns() {
@@ -116,7 +126,7 @@ function scheduleRender(force = false) {
 function visibleRange() {
   const total = state.children.length;
   if (!total) return { start: 0, end: 0, columns: 1, top: 0, bottom: 0 };
-  const columns = calculateColumns();
+  const columns = state.settings.view === "rows" ? 1 : calculateColumns();
   const rowHeight = (CARD_HEIGHT[state.settings.cardSize] || CARD_HEIGHT.standard) + (parseFloat(getComputedStyle(dom.bookmarks).rowGap) || 0);
   const scrollOffset = Math.max(0, dom.bookmarkPanel.scrollTop);
   const visibleRows = Math.ceil((dom.bookmarkPanel.clientHeight + 700) / Math.max(1, rowHeight));
@@ -219,7 +229,10 @@ function renderSidebar() {
     button.type = "button";
     button.className = "folder-button";
     button.dataset.folderId = folder.id;
-    if (folder.id === state.currentFolderId && !state.searchQuery) button.classList.add("active");
+    if (folder.id === state.currentFolderId && !state.searchQuery) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
     const iconNode = document.createElement("span");
     iconNode.textContent = icon;
     iconNode.setAttribute("aria-hidden", "true");
@@ -249,12 +262,15 @@ function renderSidebar() {
     const row = document.createElement("div"); row.className = "folder-row";
     const button = document.createElement("button"); button.type = "button"; button.className = "folder-button"; button.dataset.folderId = folder.id;
     button.style.paddingLeft = String(10 + Math.min(7, folderDepth(folder.id)) * 14) + "px";
-    if (folder.id === state.currentFolderId && !state.searchQuery) button.classList.add("active");
+    if (folder.id === state.currentFolderId && !state.searchQuery) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
     const icon = document.createElement("span"); icon.textContent = "▰"; icon.setAttribute("aria-hidden", "true");
     const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
     const count = document.createElement("span"); count.className = "folder-count"; count.textContent = String(folder.children?.length || 0);
     button.append(icon, name, count); row.appendChild(button);
-    const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id;
+    const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.textContent = "⋯"; row.appendChild(more); dom.folderTree.appendChild(row);
     for (const child of folder.children || []) if (!child.url) addFolder(child);
   }
@@ -266,6 +282,7 @@ function renderSidebar() {
 function selectFolder(folderId) {
   if (!state.map.has(folderId)) return;
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
+  dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = folderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(folderId));
   state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0;
   renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
@@ -273,6 +290,7 @@ function selectFolder(folderId) {
 
 function showSearch(query) {
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
+  dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
   state.children = getCurrentChildren(); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
@@ -280,8 +298,16 @@ function showSearch(query) {
 function showSettings(show) {
   dom.settingsPanel.classList.toggle("hidden", !show); dom.bookmarkPanel.classList.toggle("hidden", show);
   dom.settingsButton.setAttribute("aria-pressed", String(show));
-  if (show) { dom.folderTitle.textContent = "Настройки"; dom.breadcrumbs.replaceChildren(); }
-  else { dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId))); renderBreadcrumbs(); }
+  if (show) {
+    dom.folderTitle.textContent = "Настройки";
+    dom.breadcrumbs.replaceChildren();
+  } else {
+    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
+    renderBreadcrumbs();
+    updateColumns();
+    state.virtualStart = 0; state.virtualEnd = 0;
+    scheduleRender(true);
+  }
 }
 
 async function persistSettings() {
@@ -290,7 +316,6 @@ async function persistSettings() {
 }
 
 function openInputDialog({ title, label, value = "", type = "text", validate }) {
-  closeDialog(null);
   return new Promise(resolve => {
     state.dialogResolver = resolve; state.dialogValidate = validate;
     dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = ""; dom.dialogField.classList.remove("hidden");
@@ -301,7 +326,6 @@ function openInputDialog({ title, label, value = "", type = "text", validate }) 
 }
 
 function openConfirmDialog({ title, message, confirmLabel = "Удалить" }) {
-  closeDialog(null);
   return new Promise(resolve => {
     state.dialogResolver = resolve; state.dialogValidate = null; dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = message;
     dom.dialogField.classList.add("hidden"); dom.dialogError.classList.add("hidden"); dom.dialogSubmit.textContent = confirmLabel; dom.dialogSubmit.classList.add("danger");
@@ -310,7 +334,12 @@ function openConfirmDialog({ title, message, confirmLabel = "Удалить" }) 
 }
 
 function closeDialog(result = null) {
-  const resolver = state.dialogResolver; state.dialogResolver = null; state.dialogValidate = null; dom.dialog.classList.add("hidden"); resolver?.(result);
+  const resolver = state.dialogResolver;
+  const returnFocus = state.dialogReturnFocus;
+  state.dialogResolver = null; state.dialogValidate = null; state.dialogReturnFocus = null;
+  dom.dialog.classList.add("hidden");
+  resolver?.(result);
+  if (returnFocus && returnFocus.isConnected) requestAnimationFrame(() => returnFocus.focus());
 }
 
 function getMoveFolders(sourceId) {
@@ -327,7 +356,14 @@ function renderMoveFolders() {
   for (const folder of folders) {
     const button = document.createElement("button"); button.type = "button"; button.className = "move-option"; button.dataset.folderId = folder.id;
     button.style.paddingLeft = String(10 + folderDepth(folder.id) * 16) + "px"; button.textContent = getTitle(folder);
-    if (folder.id === state.moveDestinationId) button.classList.add("selected"); dom.moveList.appendChild(button);
+    if (folder.id === state.moveDestinationId) {
+      button.classList.add("selected");
+      button.setAttribute("aria-selected", "true");
+    } else {
+      button.setAttribute("aria-selected", "false");
+    }
+    button.setAttribute("role", "option");
+    dom.moveList.appendChild(button);
   }
   if (!folders.length) { const empty = document.createElement("div"); empty.className = "empty-message"; empty.textContent = "Подходящих папок нет."; dom.moveList.appendChild(empty); }
   dom.moveSubmit.disabled = !state.moveDestinationId;
@@ -335,6 +371,7 @@ function renderMoveFolders() {
 
 function openMoveDialog(sourceId) {
   const source = state.map.get(sourceId); if (!source) return;
+  state.dialogReturnFocus ||= document.activeElement;
   state.moveSourceId = sourceId;
   state.moveDestinationId = null;
   dom.moveItem.textContent = getTitle(source);
@@ -342,10 +379,19 @@ function openMoveDialog(sourceId) {
   renderMoveFolders(); dom.moveDialog.classList.remove("hidden"); requestAnimationFrame(() => dom.moveSearch.focus());
 }
 
-function closeMoveDialog() { dom.moveDialog.classList.add("hidden"); state.moveSourceId = null; state.moveDestinationId = null; }
+function closeMoveDialog() {
+  const returnFocus = state.dialogReturnFocus;
+  dom.moveDialog.classList.add("hidden");
+  state.moveSourceId = null; state.moveDestinationId = null; state.dialogReturnFocus = null;
+  if (returnFocus && returnFocus.isConnected) requestAnimationFrame(() => returnFocus.focus());
+}
 
 async function executeAction(action) {
-  const id = state.menuTargetId; const node = state.map.get(id); closeMenu(); if (!node) return;
+  const id = state.menuTargetId;
+  const node = state.map.get(id);
+  state.dialogReturnFocus = state.menuTrigger?.isConnected ? state.menuTrigger : null;
+  closeMenu();
+  if (!node) return;
   try {
     if (action === "rename") {
       const value = await openInputDialog({ title: "Переименовать", label: "Название", value: getTitle(node), validate: v => v.trim() ? "" : "Название не может быть пустым." });
@@ -368,7 +414,9 @@ function openMenu(card, x, y, trigger = null) {
   const id = card?.dataset?.itemId || card?.dataset?.folderId; if (!id || !state.map.has(id)) return;
   state.menuTargetId = id; state.menuTrigger = trigger; if (trigger) trigger.setAttribute("aria-expanded", "true");
   const node = state.map.get(id); dom.menu.querySelector('[data-action="edit"]').classList.toggle("hidden", !node.url);
-  dom.menu.classList.remove("hidden"); const rect = dom.menu.getBoundingClientRect(); const margin = 8;
+  dom.menu.classList.remove("hidden");
+  requestAnimationFrame(() => dom.menu.querySelector("button:not(.hidden)")?.focus());
+  const rect = dom.menu.getBoundingClientRect(); const margin = 8;
   dom.menu.style.left = String(Math.max(margin, Math.min(Number(x) || margin, innerWidth - rect.width - margin))) + "px";
   dom.menu.style.top = String(Math.max(margin, Math.min(Number(y) || margin, innerHeight - rect.height - margin))) + "px";
 }
@@ -466,7 +514,12 @@ function setupEvents() {
   dom.search.addEventListener("input", event => showSearch(event.target.value));
   dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
-  dom.themeButton.addEventListener("click", () => { state.settings.theme = state.settings.theme === "dark" ? "light" : "dark"; void persistSettings(); });
+  dom.themeButton.addEventListener("click", () => {
+    const themes = ["system", "light", "dark"];
+    const index = themes.indexOf(state.settings.theme);
+    state.settings.theme = themes[(index + 1) % themes.length];
+    void persistSettings();
+  });
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
   dom.ambientToggle.addEventListener("change", e => { state.settings.ambient = e.target.checked; void persistSettings(); });
   dom.opacity.addEventListener("input", e => { state.settings.surfaceOpacity = clampOpacity(e.target.value); applyVisualSettings(); clearTimeout(state.settingsSaveTimer); state.settingsSaveTimer = setTimeout(() => void saveSettings(state.settings), 120); });
@@ -475,12 +528,15 @@ function setupEvents() {
   dom.newtabToggle.addEventListener("change", e => { state.settings.openInNewTab = e.target.checked; void persistSettings(); });
   dom.breadcrumbs.addEventListener("click", e => { const button = e.target.closest("[data-folder-id]"); if (button) selectFolder(button.dataset.folderId); });
   dom.dialogCancel.addEventListener("click", () => closeDialog(null));
+  dom.dialog.addEventListener("click", event => { if (event.target === dom.dialog) closeDialog(null); });
+  dom.moveDialog.addEventListener("click", event => { if (event.target === dom.moveDialog) closeMoveDialog(); });
   dom.dialogSubmit.addEventListener("click", () => {
     if (!state.dialogResolver) return;
     if (state.dialogValidate) { const error = state.dialogValidate(dom.dialogInput.value); if (error) { dom.dialogError.textContent = error; dom.dialogError.classList.remove("hidden"); dom.dialogInput.focus(); return; } closeDialog(dom.dialogInput.value); }
     else closeDialog(true);
   });
   dom.moveCancel.addEventListener("click", closeMoveDialog); dom.moveSearch.addEventListener("input", renderMoveFolders);
+  dom.moveList.setAttribute("aria-label", "Доступные папки");
   dom.moveList.addEventListener("click", e => { const button = e.target.closest("[data-folder-id]"); if (button) { state.moveDestinationId = button.dataset.folderId; renderMoveFolders(); } });
   dom.moveSubmit.addEventListener("click", async () => { if (!state.moveSourceId || !state.moveDestinationId) return; try { await chrome.bookmarks.move(state.moveSourceId, { parentId: state.moveDestinationId }); closeMoveDialog(); } catch (error) { console.error("Move failed:", error); } });
   document.addEventListener("keydown", event => {
@@ -493,6 +549,9 @@ function setupEvents() {
   });
   dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
+  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
+    if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
+  });
   chrome.runtime.onMessage.addListener(message => { if (!state.destroyed && message?.type?.startsWith("BOOKMARK")) applyBookmarkEvent(message); });
 }
 

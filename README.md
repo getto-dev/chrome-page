@@ -14,7 +14,7 @@ Chrome new-tab bookmark workspace combining the strongest ideas from `getto-dev/
 - Light / Dark / System themes
 - Auto / 2 / 3 / 4 columns for bookmark tiles
 - Tile size, spacing, radius, blur and surface opacity settings
-- Local SVG icons and favicon fallback
+- Native favicon loading with deterministic text fallback
 - Virtualized bookmark rendering for large collections
 
 Chrome's Bookmarks API and Storage API are used through the MV3 extension model. The service worker owns cache invalidation and bookmark event broadcasting.

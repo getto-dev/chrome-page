@@ -62,6 +62,7 @@ test("settings normalization falls back safely", () => {
   assert.deepEqual(
     normalizeSettings({
       theme: "bad",
+      view: "bad",
       sortMode: "bad",
       columns: 99,
       cardSize: "bad",
@@ -79,6 +80,7 @@ test("settings normalization falls back safely", () => {
   assert.deepEqual(
     normalizeSettings({
       theme: "dark",
+      view: "rows",
       sortMode: "date",
       columns: "auto",
       cardSize: "large",
