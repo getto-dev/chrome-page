@@ -288,7 +288,7 @@ function openConfirmDialog({ title, message, confirmLabel = "Удалить" }) 
 
 function trapFocus(event, root) {
   if (event.key !== "Tab") return;
-  const focusable = [...root.querySelectorAll("button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])")]
+  const focusable = [...root.querySelectorAll('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')]
     .filter(element => !element.closest(".hidden") && element.offsetParent !== null);
   if (!focusable.length) return;
   const first = focusable[0];
