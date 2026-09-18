@@ -268,6 +268,7 @@ async function persistSettings() {
 function openInputDialog({ title, label, value = "", type = "text", validate }) {
   return new Promise(resolve => {
     state.dialogResolver = resolve; state.dialogValidate = validate;
+    state.dialogReturnFocus ||= document.activeElement;
     dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = ""; dom.dialogField.classList.remove("hidden");
     dom.dialogLabel.textContent = label; dom.dialogInput.type = type; dom.dialogInput.value = value; dom.dialogError.classList.add("hidden");
     dom.dialogSubmit.textContent = "Сохранить"; dom.dialogSubmit.classList.remove("danger"); dom.dialog.classList.remove("hidden");
@@ -277,10 +278,28 @@ function openInputDialog({ title, label, value = "", type = "text", validate }) 
 
 function openConfirmDialog({ title, message, confirmLabel = "Удалить" }) {
   return new Promise(resolve => {
-    state.dialogResolver = resolve; state.dialogValidate = null; dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = message;
+    state.dialogResolver = resolve; state.dialogValidate = null;
+    state.dialogReturnFocus ||= document.activeElement;
+    dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = message;
     dom.dialogField.classList.add("hidden"); dom.dialogError.classList.add("hidden"); dom.dialogSubmit.textContent = confirmLabel; dom.dialogSubmit.classList.add("danger");
     dom.dialog.classList.remove("hidden"); requestAnimationFrame(() => dom.dialogSubmit.focus());
   });
+}
+
+function trapFocus(event, root) {
+  if (event.key !== "Tab") return;
+  const focusable = [...root.querySelectorAll("button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])")]
+    .filter(element => !element.closest(".hidden") && element.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function closeDialog(result = null) {
@@ -371,7 +390,14 @@ function openMenu(card, x, y, trigger = null) {
   dom.menu.style.top = String(Math.max(margin, Math.min(Number(y) || margin, innerHeight - rect.height - margin))) + "px";
 }
 
-function closeMenu() { dom.menu.classList.add("hidden"); state.menuTrigger?.setAttribute("aria-expanded", "false"); state.menuTargetId = null; state.menuTrigger = null; }
+function closeMenu() {
+  const trigger = state.menuTrigger;
+  dom.menu.classList.add("hidden");
+  trigger?.setAttribute("aria-expanded", "false");
+  state.menuTargetId = null;
+  state.menuTrigger = null;
+  if (trigger?.isConnected) requestAnimationFrame(() => trigger.focus());
+}
 
 function addToParent(parentId, node, index = Infinity) {
   const parent = state.map.get(parentId); if (!parent) return; parent.children ||= [];
@@ -487,8 +513,16 @@ function setupEvents() {
     if (!dom.menu.classList.contains("hidden")) { if (event.key === "Escape") { event.preventDefault(); closeMenu(); return; }
       const items = [...dom.menu.querySelectorAll("button:not(.hidden)")]; const index = items.indexOf(document.activeElement);
       if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); const next = event.key === "ArrowDown" ? 1 : -1; items[(index + next + items.length) % items.length]?.focus(); return; } }
-    if (!dom.dialog.classList.contains("hidden")) { if (event.key === "Escape") { event.preventDefault(); closeDialog(null); } else if (event.key === "Enter" && event.target === dom.dialogInput) { event.preventDefault(); dom.dialogSubmit.click(); } }
-    if (!dom.moveDialog.classList.contains("hidden") && event.key === "Escape") { event.preventDefault(); closeMoveDialog(); }
+    if (!dom.dialog.classList.contains("hidden")) {
+      if (event.key === "Escape") { event.preventDefault(); closeDialog(null); return; }
+      trapFocus(event, dom.dialog.querySelector(".dialog"));
+      if (event.key === "Enter" && event.target === dom.dialogInput) { event.preventDefault(); dom.dialogSubmit.click(); }
+      return;
+    }
+    if (!dom.moveDialog.classList.contains("hidden")) {
+      if (event.key === "Escape") { event.preventDefault(); closeMoveDialog(); return; }
+      trapFocus(event, dom.moveDialog.querySelector(".dialog"));
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); dom.search.focus(); dom.search.select(); }
   });
   dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
