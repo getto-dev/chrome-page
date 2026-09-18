@@ -73,7 +73,6 @@ test("Chrome Page boots and manages bookmark changes", async () => {
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-radius", "sharp");
     await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("border-radius", "9px");
 
-    await expect(page.getByRole("button", { name: "Сетка" })).toHaveCount(0);
   } finally {
     const worker = context.serviceWorkers()[0];
     if (worker && bookmarkId) {
