@@ -285,7 +285,6 @@ function renderSidebar() {
   }
   roots.forEach(addFolder);
   if (!roots.length) { const empty = document.createElement("div"); empty.className = "folder-name"; empty.style.padding = "12px 10px"; empty.style.color = "var(--muted)"; empty.textContent = "Папок пока нет"; dom.folderTree.appendChild(empty); }
-  dom.total.textContent = String([...state.map.values()].filter(node => node.url).length);
 }
 
 function selectFolder(folderId) {
