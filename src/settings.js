@@ -51,12 +51,21 @@ export function normalizeSettings(input) {
 }
 
 export async function loadSettings() {
-  const result = await chrome.storage.local.get("settings");
-  return normalizeSettings(result.settings);
+  try {
+    const result = await chrome.storage.local.get("settings");
+    return normalizeSettings(result.settings);
+  } catch (error) {
+    console.warn("Chrome Page settings load failed; using defaults.", error);
+    return { ...DEFAULT_SETTINGS };
+  }
 }
 
 export async function saveSettings(settings) {
   const normalized = normalizeSettings(settings);
-  await chrome.storage.local.set({ settings: normalized });
+  try {
+    await chrome.storage.local.set({ settings: normalized });
+  } catch (error) {
+    console.warn("Chrome Page settings save failed.", error);
+  }
   return normalized;
 }
