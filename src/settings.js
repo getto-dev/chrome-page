@@ -1,6 +1,5 @@
 export const DEFAULT_SETTINGS = {
   theme: "system",
-  view: "grid",
   sortMode: "default",
   columns: "auto",
   cardSize: "standard",
@@ -15,7 +14,6 @@ export const DEFAULT_SETTINGS = {
 
 const ENUMS = {
   theme: new Set(["system", "light", "dark"]),
-  view: new Set(["grid", "rows"]),
   sortMode: new Set(["default", "name", "date"]),
   columns: new Set(["auto", 2, 3, 4]),
   cardSize: new Set(["compact", "standard", "large"]),
@@ -35,7 +33,6 @@ export function normalizeSettings(input) {
 
   return {
     theme: ENUMS.theme.has(source.theme) ? source.theme : DEFAULT_SETTINGS.theme,
-    view: ENUMS.view.has(source.view) ? source.view : DEFAULT_SETTINGS.view,
     sortMode: ENUMS.sortMode.has(source.sortMode) ? source.sortMode : DEFAULT_SETTINGS.sortMode,
     columns: ENUMS.columns.has(rawColumns) ? rawColumns : DEFAULT_SETTINGS.columns,
     cardSize: ENUMS.cardSize.has(source.cardSize) ? source.cardSize : DEFAULT_SETTINGS.cardSize,

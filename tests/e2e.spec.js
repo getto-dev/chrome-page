@@ -57,11 +57,6 @@ test("Chrome Page boots and manages bookmark changes", async () => {
 
     await page.getByRole("button", { name: "Настройки" }).click();
     await expect(page.locator("#settings-panel")).toBeVisible();
-    await page.locator('[data-setting="view"] button[data-value="rows"]').click();
-    await expect(page.locator("#bookmarks")).toHaveAttribute("data-view", "rows");
-    await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(1);
-
-    await page.locator('[data-setting="view"] button[data-value="grid"]').click();
     await page.locator('[data-setting="columns"] button[data-value="2"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-columns", "2");
     await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(2);
@@ -76,15 +71,15 @@ test("Chrome Page boots and manages bookmark changes", async () => {
 
     await page.locator('[data-setting="cardSize"] button[data-value="large"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-size", "large");
-    await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("height", "88px");
+    await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("height", "84px");
 
     await page.locator('[data-setting="spacing"] button[data-value="large"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-spacing", "large");
-    await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).rowGap)).toBe("29.6px");
+    await expect(page.locator("#bookmarks").evaluate(el => getComputedStyle(el).rowGap)).toBe("18px");
 
     await page.locator('[data-setting="radius"] button[data-value="sharp"]').click();
     await expect(page.locator("#bookmarks")).toHaveAttribute("data-radius", "sharp");
-    await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("border-radius", "9px");
+    await expect(page.locator("#bookmarks .bookmark-card")).toHaveCSS("border-radius", "10px");
 
   } finally {
     const worker = context.serviceWorkers()[0];

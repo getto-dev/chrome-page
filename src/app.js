@@ -90,7 +90,6 @@ function applyVisualSettings() {
   dom.html.dataset.blur = state.settings.blur;
   dom.html.dataset.ambient = String(state.settings.ambient);
   dom.html.style.setProperty("--alpha", String(state.settings.surfaceOpacity / 100));
-  dom.bookmarks.dataset.view = state.settings.view;
   dom.bookmarks.dataset.columns = String(state.settings.columns);
   dom.bookmarks.dataset.size = state.settings.cardSize;
   dom.bookmarks.dataset.spacing = state.settings.spacing;
@@ -137,7 +136,7 @@ function scheduleRender(force = false) {
 function visibleRange() {
   const total = state.children.length;
   if (!total) return { start: 0, end: 0, columns: 1, top: 0, bottom: 0 };
-  const columns = state.settings.view === "rows" ? 1 : calculateColumns();
+  const columns = calculateColumns();
   const rowHeight = (CARD_HEIGHT[state.settings.cardSize] || CARD_HEIGHT.standard) + (parseFloat(getComputedStyle(dom.bookmarks).rowGap) || 0);
   const scrollOffset = Math.max(0, dom.bookmarkPanel.scrollTop);
   const visibleRows = Math.ceil((dom.bookmarkPanel.clientHeight + 700) / Math.max(1, rowHeight));
