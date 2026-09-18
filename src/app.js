@@ -293,8 +293,16 @@ function showSearch(query) {
 function showSettings(show) {
   dom.settingsPanel.classList.toggle("hidden", !show); dom.bookmarkPanel.classList.toggle("hidden", show);
   dom.settingsButton.setAttribute("aria-pressed", String(show));
-  if (show) { dom.folderTitle.textContent = "Настройки"; dom.breadcrumbs.replaceChildren(); }
-  else { dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId))); renderBreadcrumbs(); }
+  if (show) {
+    dom.folderTitle.textContent = "Настройки";
+    dom.breadcrumbs.replaceChildren();
+  } else {
+    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
+    renderBreadcrumbs();
+    updateColumns();
+    state.virtualStart = 0; state.virtualEnd = 0;
+    scheduleRender(true);
+  }
 }
 
 async function persistSettings() {
@@ -518,6 +526,7 @@ function setupEvents() {
     else closeDialog(true);
   });
   dom.moveCancel.addEventListener("click", closeMoveDialog); dom.moveSearch.addEventListener("input", renderMoveFolders);
+  dom.moveList.setAttribute("aria-label", "Доступные папки");
   dom.moveList.addEventListener("click", e => { const button = e.target.closest("[data-folder-id]"); if (button) { state.moveDestinationId = button.dataset.folderId; renderMoveFolders(); } });
   dom.moveSubmit.addEventListener("click", async () => { if (!state.moveSourceId || !state.moveDestinationId) return; try { await chrome.bookmarks.move(state.moveSourceId, { parentId: state.moveDestinationId }); closeMoveDialog(); } catch (error) { console.error("Move failed:", error); } });
   document.addEventListener("keydown", event => {
@@ -529,7 +538,6 @@ function setupEvents() {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); dom.search.focus(); dom.search.select(); }
   });
   dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
-  dom.bookmarkPanel.addEventListener("scrollend", () => scheduleRender(), { passive: true });
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
     if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
