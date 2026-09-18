@@ -29,7 +29,6 @@ html[data-theme=dark]{
   --muted-2:#777c87;
   --surface:24,27,34;
   --alpha:.82;
-  --surface-strong:.94;
   --border:rgba(255,255,255,.08);
   --border-strong:rgba(255,255,255,.14);
   --hover:rgba(255,255,255,.055);
@@ -51,7 +50,6 @@ html[data-theme=dark]{
     --muted-2:#777c87;
     --surface:24,27,34;
     --alpha:.82;
-    --surface-strong:.94;
     --border:rgba(255,255,255,.08);
     --border-strong:rgba(255,255,255,.14);
     --hover:rgba(255,255,255,.055);
