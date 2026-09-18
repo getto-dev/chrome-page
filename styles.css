@@ -144,49 +144,31 @@ html[data-ambient=false] .ambient{display:none}
 .header-actions{display:flex;align-items:center;gap:8px;flex:none}
 .header-status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
 #header-mode-dot{width:7px;height:7px;border-radius:50%;background:#66d19e;box-shadow:0 0 0 4px rgba(102,209,158,.1)}
-.segmented{display:flex;gap:2px;padding:3px;border:1px solid var(--border);border-radius:12px;background:rgba(var(--surface),.42)}
-.segmented button{border:0;border-radius:9px;padding:7px 11px;background:transparent;color:var(--muted);font-size:11.5px;font-weight:650;cursor:pointer;transition:background var(--transition),color var(--transition),transform var(--transition)}
-.segmented button:hover{color:var(--text)}
-.segmented button.active{background:var(--active);color:var(--active-text);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .ghost-button{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:11px;background:rgba(var(--surface),.45);padding:8px 11px;color:var(--muted);font-size:11px;font-weight:650;cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition)}
 .ghost-button:hover{background:var(--hover);border-color:var(--border-strong);color:var(--text)}
 
 .content-panel{flex:1;min-height:0;overflow:auto;padding:20px}
-.bookmarks{--auto-columns:3;--card-min-width:220px;display:grid;grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));gap:var(--gap);contain:layout paint}
+.bookmarks{--auto-columns:3;--card-min-width:220px;--card-height:72px;--favicon-size:34px;--title-size:13.5px;display:grid;grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));gap:var(--gap);contain:layout paint}
 .bookmarks[data-spacing=compact]{--gap:.72rem}
 .bookmarks[data-spacing=standard]{--gap:1.2rem}
 .bookmarks[data-spacing=large]{--gap:1.85rem}
-.bookmarks[data-size=compact]{--card-min-width:180px}
-.bookmarks[data-size=standard]{--card-min-width:220px}
-.bookmarks[data-size=large]{--card-min-width:300px}
+.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:56px;--favicon-size:30px;--title-size:12.5px}
+.bookmarks[data-size=standard]{--card-min-width:220px;--card-height:72px;--favicon-size:34px;--title-size:13.5px}
+.bookmarks[data-size=large]{--card-min-width:300px;--card-height:88px;--favicon-size:42px;--title-size:14.5px}
 .bookmarks[data-radius=sharp]{--radius:9px}
 .bookmarks[data-radius=soft]{--radius:14px}
 .bookmarks[data-radius=round]{--radius:20px}
-html[data-view=rows] .bookmarks{--card-min-width:280px;grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));gap:10px}
 
-.card{position:relative;min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:rgba(var(--surface),var(--alpha));box-shadow:var(--shadow-card);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition),background var(--transition)}
+.card{position:relative;height:var(--card-height);min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:rgba(var(--surface),var(--alpha));box-shadow:var(--shadow-card);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition),background var(--transition)}
 .card:hover{transform:translateY(-3px);border-color:var(--border-strong);background:rgba(var(--surface),var(--surface-strong));box-shadow:var(--shadow-card-hover)}
-.card-link{display:flex;align-items:center;gap:11px;width:100%;min-width:0;height:100%;padding:13px 48px 13px 14px;border:0;background:transparent;color:var(--text);text-decoration:none;text-align:left;cursor:pointer}
-.favicon{display:grid;place-items:center;flex:none;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:rgba(var(--surface),.86);overflow:hidden;font-size:11px;font-weight:800;letter-spacing:-.03em;color:var(--accent)}
+.card-link{display:flex;align-items:center;gap:11px;width:100%;min-width:0;height:100%;padding:10px 48px 10px 14px;border:0;background:transparent;color:var(--text);text-decoration:none;text-align:left;cursor:pointer}
+.favicon{display:grid;place-items:center;flex:none;width:var(--favicon-size);height:var(--favicon-size);border:1px solid var(--border);border-radius:10px;background:rgba(var(--surface),.86);overflow:hidden;font-size:11px;font-weight:800;letter-spacing:-.03em;color:var(--accent)}
 .favicon img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .card-text{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.card-title{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:13.5px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+.card-title{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:var(--title-size);line-height:1.3;font-weight:600;letter-spacing:-.01em}
 .card-meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:10.5px;line-height:1.25}
 .bookmark-card .favicon{color:var(--accent)}
 .folder-card .favicon{background:rgba(109,93,252,.09);border-color:rgba(109,93,252,.2);color:var(--accent)}
-html[data-view=grid] .bookmark-card,html[data-view=grid] .folder-card{min-height:124px}
-html[data-view=grid] .card-link{flex-direction:column;justify-content:center;text-align:center;padding:17px 44px 15px 17px;gap:9px}
-html[data-view=grid] .favicon{width:48px;height:48px;border-radius:13px}
-html[data-view=grid] .card-text{width:100%;align-items:center}
-html[data-view=grid] .card-title{width:100%;white-space:nowrap;-webkit-line-clamp:1}
-html[data-view=grid] .card-meta{width:100%}
-html[data-view=rows] .bookmark-card,html[data-view=rows] .folder-card{min-height:58px}
-html[data-view=rows] .card-link{padding-block:10px}
-html .bookmarks[data-size=compact] .card{border-radius:var(--radius)}
-html[data-view=grid] .bookmarks[data-size=compact] .bookmark-card,html[data-view=grid] .bookmarks[data-size=compact] .folder-card{min-height:96px}
-html[data-view=grid] .bookmarks[data-size=large] .bookmark-card,html[data-view=grid] .bookmarks[data-size=large] .folder-card{min-height:148px}
-html[data-view=grid] .bookmarks[data-size=large] .favicon{width:58px;height:58px}
-html[data-view=grid] .bookmarks[data-size=large] .card-title{font-size:14.5px}
 
 .empty-message{grid-column:1/-1;display:grid;place-items:center;min-height:240px;padding:36px;border:1px dashed var(--border-strong);border-radius:20px;background:rgba(var(--surface),.28);color:var(--muted);font-size:13px;text-align:center}
 
@@ -269,13 +251,9 @@ html[data-view=grid] .bookmarks[data-size=large] .card-title{font-size:14.5px}
   .workspace-header{flex-wrap:wrap;gap:11px}
   .heading{width:100%;flex-basis:100%}
   .header-actions{width:100%;justify-content:space-between}
-  .segmented{flex:1}
-  .segmented button{flex:1}
   .ghost-button{flex:none}
   .content-panel{padding:10px}
   .bookmarks{gap:.75rem}
-  html[data-view=grid] .bookmark-card,html[data-view=grid] .folder-card{min-height:102px}
-  html[data-view=grid] .favicon{width:42px;height:42px}
   .settings-card{padding:18px;border-radius:18px}
   .settings-panel{padding:10px}
   .toggle-row,.range-row,.color-row{align-items:flex-start;flex-wrap:wrap}
