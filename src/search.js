@@ -12,8 +12,14 @@ export function getSearchResults(map, query, bookmarksBarId) {
       const hostname = getHostname(bookmark.url || "").toLocaleLowerCase();
       const path = getFolderPath(map, bookmark.parentId, bookmarksBarId).toLocaleLowerCase();
       const score =
-        (title === q ? 0 : title.startsWith(q) ? 1 : title.includes(q) ? 2 : 3) +
-        (hostname === q ? 0 : hostname.startsWith(q) ? 1 : 2);
+        title === q ? 0 :
+        title.startsWith(q) ? 10 :
+        hostname === q ? 20 :
+        hostname.startsWith(q) ? 30 :
+        title.includes(q) ? 40 :
+        hostname.includes(q) ? 50 :
+        url.includes(q) ? 60 :
+        path.includes(q) ? 70 : 80;
 
       return { bookmark, title, url, hostname, path, score };
     })
@@ -25,7 +31,8 @@ export function getSearchResults(map, query, bookmarksBarId) {
     )
     .sort((a, b) =>
       a.score - b.score ||
-      a.title.localeCompare(b.title, undefined, { sensitivity: "base", numeric: true })
+      a.title.localeCompare(b.title, undefined, { sensitivity: "base", numeric: true }) ||
+      a.url.localeCompare(b.url, undefined, { sensitivity: "base", numeric: true })
     )
     .map(entry => entry.bookmark);
 }
