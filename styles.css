@@ -384,7 +384,6 @@ html[data-ambient=false] .ambient{display:none}
 .crumb.current{font-weight:650;color:var(--muted)}
 .breadcrumbs>span:not(.current){color:var(--muted-2)}
 
-.header-actions{display:flex;align-items:center;gap:9px;flex:none}
 .ghost-button{
   display:flex;
   align-items:center;
@@ -769,7 +768,6 @@ html[data-ambient=false] .ambient{display:none}
   .sidebar-footer .icon-button{width:34px;height:34px}
   .workspace{border-radius:16px}
   .workspace-header{align-items:flex-start;min-height:0;padding:15px}
-  .header-actions{width:auto}
   .content-panel{padding:14px}
   .setting-grid{grid-template-columns:1fr}
 }
@@ -777,7 +775,6 @@ html[data-ambient=false] .ambient{display:none}
   .search-kbd{display:none}
   .workspace-header{flex-wrap:wrap;gap:10px}
   .heading{width:100%;flex-basis:100%}
-  .header-actions{width:100%;justify-content:space-between}
   .ghost-button{flex:none}
   .content-panel{padding:10px}
   .bookmarks{gap:10px}
