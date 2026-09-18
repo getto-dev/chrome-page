@@ -122,9 +122,8 @@ function visibleRange() {
   if (!total) return { start: 0, end: 0, columns: 1, top: 0, bottom: 0 };
   const columns = calculateColumns();
   const rowHeight = (CARD_HEIGHT[state.settings.cardSize] || CARD_HEIGHT.standard) + (parseFloat(getComputedStyle(dom.bookmarks).rowGap) || 0);
-  const rect = dom.bookmarks.getBoundingClientRect();
-  const scrollOffset = Math.max(0, -rect.top);
-  const visibleRows = Math.ceil((window.innerHeight + 700) / Math.max(1, rowHeight));
+  const scrollOffset = Math.max(0, dom.bookmarkPanel.scrollTop);
+  const visibleRows = Math.ceil((dom.bookmarkPanel.clientHeight + 700) / Math.max(1, rowHeight));
   const currentRow = Math.floor(scrollOffset / Math.max(1, rowHeight));
   const startRow = Math.max(0, currentRow - 4);
   const endRow = Math.min(Math.ceil(total / columns), startRow + visibleRows);
@@ -459,7 +458,7 @@ function setupEvents() {
     if (!dom.moveDialog.classList.contains("hidden") && event.key === "Escape") { event.preventDefault(); closeMoveDialog(); }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); dom.search.focus(); dom.search.select(); }
   });
-  window.addEventListener("scroll", () => scheduleRender(), { passive: true });
+  dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
   chrome.runtime.onMessage.addListener(message => { if (!state.destroyed && message?.type?.startsWith("BOOKMARK")) applyBookmarkEvent(message); });
 }
