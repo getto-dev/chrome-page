@@ -259,12 +259,15 @@ function renderSidebar() {
     const row = document.createElement("div"); row.className = "folder-row";
     const button = document.createElement("button"); button.type = "button"; button.className = "folder-button"; button.dataset.folderId = folder.id;
     button.style.paddingLeft = String(10 + Math.min(7, folderDepth(folder.id)) * 14) + "px";
-    if (folder.id === state.currentFolderId && !state.searchQuery) button.classList.add("active");
+    if (folder.id === state.currentFolderId && !state.searchQuery) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
     const icon = document.createElement("span"); icon.textContent = "▰"; icon.setAttribute("aria-hidden", "true");
     const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
     const count = document.createElement("span"); count.className = "folder-count"; count.textContent = String(folder.children?.length || 0);
     button.append(icon, name, count); row.appendChild(button);
-    const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id;
+    const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.textContent = "⋯"; row.appendChild(more); dom.folderTree.appendChild(row);
     for (const child of folder.children || []) if (!child.url) addFolder(child);
   }
@@ -300,8 +303,6 @@ async function persistSettings() {
 }
 
 function openInputDialog({ title, label, value = "", type = "text", validate }) {
-  closeDialog(null);
-  state.dialogReturnFocus ||= document.activeElement;
   return new Promise(resolve => {
     state.dialogResolver = resolve; state.dialogValidate = validate;
     dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = ""; dom.dialogField.classList.remove("hidden");
@@ -312,8 +313,6 @@ function openInputDialog({ title, label, value = "", type = "text", validate }) 
 }
 
 function openConfirmDialog({ title, message, confirmLabel = "Удалить" }) {
-  closeDialog(null);
-  state.dialogReturnFocus ||= document.activeElement;
   return new Promise(resolve => {
     state.dialogResolver = resolve; state.dialogValidate = null; dom.dialogTitle.textContent = title; dom.dialogMessage.textContent = message;
     dom.dialogField.classList.add("hidden"); dom.dialogError.classList.add("hidden"); dom.dialogSubmit.textContent = confirmLabel; dom.dialogSubmit.classList.add("danger");
@@ -377,7 +376,7 @@ function closeMoveDialog() {
 async function executeAction(action) {
   const id = state.menuTargetId;
   const node = state.map.get(id);
-  state.dialogReturnFocus = state.menuTrigger;
+  state.dialogReturnFocus = state.menuTrigger?.isConnected ? state.menuTrigger : null;
   closeMenu();
   if (!node) return;
   try {
@@ -530,6 +529,7 @@ function setupEvents() {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); dom.search.focus(); dom.search.select(); }
   });
   dom.bookmarkPanel.addEventListener("scroll", () => scheduleRender(), { passive: true });
+  dom.bookmarkPanel.addEventListener("scrollend", () => scheduleRender(), { passive: true });
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
   window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
     if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
