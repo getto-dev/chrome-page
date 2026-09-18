@@ -231,6 +231,7 @@ function renderSidebar() {
 
 function selectFolder(folderId) {
   if (!state.map.has(folderId)) return;
+  showSettings(false);
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
   dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = folderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(folderId));
