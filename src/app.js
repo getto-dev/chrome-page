@@ -98,14 +98,12 @@ function applyVisualSettings() {
 
 function calculateColumns() {
   if (state.settings.columns !== "auto") {
-    let columns = Number(state.settings.columns);
-    if (window.innerWidth <= 560) return 1;
-    if (window.innerWidth <= 900) return Math.min(columns, 2);
-    return columns;
+    return Math.max(1, Math.min(4, Number(state.settings.columns) || 3));
   }
+  const style = getComputedStyle(dom.bookmarks);
   const width = Math.max(0, dom.bookmarks.clientWidth);
-  const gap = parseFloat(getComputedStyle(dom.bookmarks).columnGap) || 18;
-  const minWidth = state.settings.cardSize === "compact" ? 180 : state.settings.cardSize === "large" ? 300 : 220;
+  const gap = parseFloat(style.columnGap) || 18;
+  const minWidth = parseFloat(style.getPropertyValue("--card-min-width")) || 220;
   return Math.max(1, Math.min(4, Math.floor((width + gap) / (minWidth + gap))));
 }
 
