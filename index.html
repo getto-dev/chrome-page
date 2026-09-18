@@ -121,7 +121,7 @@
     <div class="dialog move-dialog">
       <h2 id="move-title">Переместить</h2>
       <p id="move-item"></p>
-      <input id="move-search" class="dialog-input" type="search" placeholder="Поиск папки…">
+      <input id="move-search" class="dialog-input" type="search" aria-label="Поиск папки" placeholder="Поиск папки…">
       <div id="move-list" class="move-list" role="listbox"></div>
       <div class="dialog-actions"><button id="move-cancel" type="button">Отмена</button><button id="move-submit" type="button" disabled>Переместить</button></div>
     </div>
@@ -132,7 +132,7 @@
   </template>
 
   <template id="folder-template">
-    <article class="card folder-card"><button class="card-link folder-link" type="button"><span class="favicon folder-icon"><svg class="icon" aria-hidden="true"><use href="#icon-folder"></use></svg></span><span class="card-text"><strong class="card-title"></strong></span></button><button class="more" type="button" aria-label="Действия"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
+    <article class="card folder-card"><button class="card-link folder-link" type="button"><span class="favicon folder-icon"><svg class="icon" aria-hidden="true"><use href="#icon-folder"></use></svg></span><span class="card-text"><strong class="card-title"></strong></span></button><button class="more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Действия папки"><svg class="icon" aria-hidden="true"><use href="#icon-more"></use></svg></button></article>
   </template>
 
   <script type="module" src="src/app.js"></script>
