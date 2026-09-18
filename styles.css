@@ -93,19 +93,19 @@ html[data-ambient=false] .ambient{display:none}
 .sidebar{position:relative;display:flex;flex-direction:column;min-height:0;border-radius:24px;padding:14px 12px}
 .workspace{display:flex;flex-direction:column;min-height:0;border-radius:24px;overflow:hidden}
 
-.brand-row{display:flex;align-items:center;justify-content:space-between;padding:6px 7px 15px;border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:9px;min-width:0}
-.brand-mark{display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:linear-gradient(135deg,rgba(129,112,255,.2),rgba(90,197,255,.16));color:var(--accent);font-size:17px;box-shadow:inset 0 0 0 1px var(--accent-border)}
-.badge{min-width:30px;padding:5px 8px;text-align:center;border:1px solid var(--accent-border);border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.icon{display:block;width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .search{display:flex;align-items:center;gap:8px}
 .search-sidebar{position:relative;margin:13px 2px 12px;padding:10px 11px 10px 12px;border:1px solid var(--border);border-radius:14px;background:rgba(var(--surface),.5);transition:border-color var(--transition),box-shadow var(--transition),background var(--transition)}
 .search-sidebar:focus-within{border-color:var(--accent-border);background:rgba(var(--surface),.62);box-shadow:0 0 0 4px var(--accent-soft)}
-.search-icon{color:var(--muted);font-size:16px;line-height:1}
+.search-icon{width:16px;height:16px;color:var(--muted)}
 .search-sidebar input{min-width:0;width:100%;height:20px;padding:0;border:0;outline:0;background:transparent;font-size:13px}
 .search-sidebar input::placeholder{color:var(--muted)}
 .search-kbd{flex:none;padding:2px 6px;border:1px solid var(--border-strong);border-bottom-color:var(--border-strong);border-radius:6px;background:rgba(var(--surface),.45);color:var(--muted);font-size:10px;font-family:inherit}
-.clear{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:0 2px;font-size:15px;line-height:1}
+.clear{display:grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;transition:background var(--transition),color var(--transition)}
+.clear:hover{background:var(--hover);color:var(--text)}
+.clear .icon{width:14px;height:14px}
 
 .sidebar-label{display:flex;align-items:center;gap:8px;padding:5px 9px 8px;color:var(--muted-2);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .sidebar-label-line{height:1px;flex:1;background:linear-gradient(90deg,var(--border-strong),transparent)}
@@ -115,6 +115,7 @@ html[data-ambient=false] .ambient{display:none}
 .folder-row{display:flex;align-items:center;gap:4px;min-height:39px}
 .folder-button{position:relative;display:flex;align-items:center;gap:9px;flex:1;min-width:0;padding:8px 10px;border:1px solid transparent;border-radius:11px;background:transparent;text-align:left;cursor:pointer;color:var(--muted);transition:background var(--transition),color var(--transition),border-color var(--transition),transform var(--transition)}
 .folder-button:hover{background:var(--hover);color:var(--text)}
+.folder-button>.icon{width:16px;height:16px;color:currentColor;opacity:.72}
 .folder-button.active{background:var(--active);color:var(--active-text);box-shadow:0 5px 16px rgba(0,0,0,.08)}
 .folder-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:560}
 .folder-count{margin-left:auto;flex:none;font-size:10px;color:var(--muted-2);font-variant-numeric:tabular-nums}
@@ -122,8 +123,9 @@ html[data-ambient=false] .ambient{display:none}
 .folder-row>.more{opacity:0}
 .folder-row:hover>.more,.folder-row>.more:focus-visible{opacity:1}
 
-.more{flex:none;width:34px;height:34px;border:1px solid transparent;border-radius:9px;background:rgba(var(--surface),.5);color:var(--muted);cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition)}
+.more{flex:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid transparent;border-radius:9px;background:rgba(var(--surface),.5);color:var(--muted);cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition)}
 .more:hover{background:var(--hover);border-color:var(--border);color:var(--text)}
+.more .icon{width:17px;height:17px}
 .card .more{position:absolute;right:7px;top:50%;transform:translateY(-50%);z-index:2;opacity:0;box-shadow:0 5px 18px rgba(0,0,0,.06)}
 .card:hover .more,.card:focus-within .more,.card .more:focus-visible{opacity:1}
 .card .more:active{transform:translateY(-50%) scale(.95)}
@@ -133,7 +135,7 @@ html[data-ambient=false] .ambient{display:none}
 .bookmarks[data-view=rows] .card-meta{max-width:34%;flex:none;font-size:11px}
 
 .sidebar-footer{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;margin-top:8px;border-top:1px solid var(--border)}
-.icon-button{width:38px;height:38px;border:1px solid var(--border);border-radius:12px;background:rgba(var(--surface),.46);color:var(--muted);cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition)}
+.icon-button{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--border);border-radius:12px;background:rgba(var(--surface),.46);color:var(--muted);cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition)}
 .icon-button:hover{background:var(--hover);color:var(--text);border-color:var(--border-strong)}
 .icon-button:active{transform:scale(.96)}
 .icon-button[aria-pressed=true]{background:var(--active);color:var(--active-text);border-color:transparent}
@@ -149,7 +151,7 @@ html[data-ambient=false] .ambient{display:none}
 .header-actions{display:flex;align-items:center;gap:8px;flex:none}
 .header-status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
 #header-mode-dot{width:7px;height:7px;border-radius:50%;background:#66d19e;box-shadow:0 0 0 4px rgba(102,209,158,.1)}
-.ghost-button{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:11px;background:rgba(var(--surface),.45);padding:8px 11px;color:var(--muted);font-size:11px;font-weight:650;cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition)}
+.ghost-button{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:11px;background:rgba(var(--surface),.45);padding:8px 11px;color:var(--muted);font-size:11px;font-weight:650;cursor:pointer;transition:background var(--transition),border-color var(--transition),color var(--transition)}
 .ghost-button:hover{background:var(--hover);border-color:var(--border-strong);color:var(--text)}
 
 .content-panel{flex:1;min-height:0;overflow:auto;padding:20px}
@@ -174,6 +176,7 @@ html[data-ambient=false] .ambient{display:none}
 .card-meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:10.5px;line-height:1.25}
 .bookmark-card .favicon{color:var(--accent)}
 .folder-card .favicon{background:rgba(109,93,252,.09);border-color:rgba(109,93,252,.2);color:var(--accent)}
+.folder-card .favicon .icon{width:18px;height:18px}
 
 .empty-message{grid-column:1/-1;display:grid;place-items:center;min-height:240px;padding:36px;border:1px dashed var(--border-strong);border-radius:20px;background:rgba(var(--surface),.28);color:var(--muted);font-size:13px;text-align:center}
 
