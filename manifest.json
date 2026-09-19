@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "Chrome Page",
   "version": "1.0.0",
+  "minimum_chrome_version": "134",
   "description": "Fast bookmark workspace for the Chrome new tab.",
   "permissions": [
     "bookmarks",
