@@ -18,6 +18,7 @@
       <path fill="#F2B63F" d="M3.5 12.1h25v2.1H3.5z"/>
     </symbol>
     <symbol id="icon-mobile" viewBox="0 0 24 24"><rect x="7" y="3.5" width="10" height="17" rx="2"/><path d="M10 6.5h4M11 17.5h2"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
     <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="5.8"/><path d="m15.3 15.3 5 5"/></symbol>
     <symbol id="icon-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.2 12a7.2 7.2 0 0 0-.1-1.2l2-1.5-1.8-3.2-2.3 1a7.4 7.4 0 0 0-2.1-1.2L14.5 3h-5l-.4 2.9A7.4 7.4 0 0 0 7 7.1l-2.3-1-1.8 3.2 2 1.5a7.2 7.2 0 0 0 0 2.4l-2 1.5 1.8 3.2 2.3-1a7.4 7.4 0 0 0 2.1 1.2l.4 2.9h5l.4-2.9a7.4 7.4 0 0 0 2.1-1.2l2.3 1 1.8-3.2-2-1.5c.1-.4.1-.8.1-1.2Z"/></symbol>
     <symbol id="icon-external" viewBox="0 0 24 24"><path d="M14 5h5v5M10 14l9-9M19 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h4"/></symbol>
@@ -36,12 +37,12 @@
 
   <div class="shell">
     <aside class="sidebar" aria-label="Навигация по закладкам">
-      <label class="search search-sidebar">
+      <div class="search search-sidebar" role="search" aria-label="Поиск закладок">
         <svg class="icon search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
         <input id="search" type="search" autocomplete="off" spellcheck="false" placeholder="Поиск закладок…" aria-label="Поиск закладок">
         <kbd id="search-kbd" class="search-kbd" aria-hidden="true">Ctrl K</kbd>
         <button id="search-clear" type="button" class="clear hidden" aria-label="Очистить поиск"><svg class="icon" aria-hidden="true"><use href="#icon-clear"></use></svg></button>
-      </label>
+      </div>
 
       <nav id="folder-tree" class="folder-tree"></nav>
 

@@ -221,6 +221,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   align-items:center;
   gap:2px;
   min-height:34px;
+  min-width:0;
 }
 .folder-button{
   position:relative;
@@ -241,6 +242,25 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:none}
 .folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.9}
+.folder-toggle,
+.folder-toggle-spacer{
+  flex:none;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:30px;
+}
+.folder-toggle{
+  padding:0;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+}
+.folder-toggle:hover{background:var(--hover);color:var(--text)}
+.folder-toggle .icon{width:14px;height:14px;transition:transform var(--transition)}
+.folder-toggle[aria-expanded=true] .icon{transform:rotate(90deg)}
 .folder-name{
   min-width:0;
   overflow:hidden;
@@ -386,7 +406,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 .content-panel{flex:1;min-height:0;overflow:auto;padding:11px 13px 18px}
 .bookmarks{
   --auto-columns:3;
-  --card-min-width:240px;
+  --auto-min-width:240px;
   --card-height:58px;
   --favicon-size:32px;
   --title-size:13.5px;
@@ -399,9 +419,9 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 .bookmarks[data-spacing=compact]{--gap:6px}
 .bookmarks[data-spacing=standard]{--gap:9px}
 .bookmarks[data-spacing=large]{--gap:12px}
-.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:52px;--favicon-size:29px;--title-size:12.5px}
-.bookmarks[data-size=standard]{--card-min-width:200px;--card-height:58px;--favicon-size:32px;--title-size:13.5px}
-.bookmarks[data-size=large]{--card-min-width:260px;--card-height:68px;--favicon-size:36px;--title-size:14px}
+.bookmarks[data-size=compact]{--auto-min-width:180px;--card-height:52px;--favicon-size:29px;--title-size:12.5px}
+.bookmarks[data-size=standard]{--auto-min-width:200px;--card-height:58px;--favicon-size:32px;--title-size:13.5px}
+.bookmarks[data-size=large]{--auto-min-width:260px;--card-height:68px;--favicon-size:36px;--title-size:14px}
 .card{
   position:relative;
   height:var(--card-height);
@@ -731,8 +751,8 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
     gap:8px;
   }
   .sidebar{min-height:86px;max-height:220px;border-radius:13px}
-  .folder-tree{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
-  .folder-row{min-width:172px}
+  .folder-tree{flex-direction:column;overflow-x:hidden;overflow-y:auto;padding-bottom:2px}
+  .folder-row{min-width:0}
   .folder-tree .folder-row>.more{display:none}
   .sidebar-footer{
     position:static;
@@ -771,13 +791,5 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 
 
-@media (min-width:1400px){
-  .bookmarks[data-columns=auto]{
-    --card-min-width:240px;
-  }
-}
-@media (max-width:1100px){
-  .bookmarks{
-    --card-min-width:210px;
-  }
-}
+.search-sidebar input[type="search"]::-webkit-search-cancel-button,
+.search-sidebar input[type="search"]::-webkit-search-decoration{appearance:none;-webkit-appearance:none;display:none}
