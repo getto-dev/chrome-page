@@ -391,7 +391,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   --favicon-size:32px;
   --title-size:13.5px;
   display:grid;
-  grid-template-columns:repeat(var(--auto-columns,3),minmax(var(--card-min-width),1fr));
+  grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));
   gap:var(--gap);
   align-content:start;
   contain:layout;
