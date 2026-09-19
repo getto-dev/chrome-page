@@ -133,8 +133,10 @@ function createBookmarkCard(bookmark) {
   link.href = isValidHttpUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
   if (state.settings.openInNewTab) link.rel = "noopener noreferrer";
   link.querySelector(".card-title").textContent = title;
-  meta.textContent = state.searchQuery ? getFolderPath(state.map, bookmark.parentId, state.bookmarksBarId) : "";
-  meta.hidden = !state.searchQuery;
+  meta.textContent = state.searchQuery
+    ? getFolderPath(state.map, bookmark.parentId, state.bookmarksBarId)
+    : host;
+  meta.hidden = !meta.textContent;
   more.setAttribute("aria-label", "Действия закладки «" + title + "»");
   attachFavicon(link.querySelector(".favicon"), url, host); return card;
 }
