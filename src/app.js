@@ -247,18 +247,7 @@ function renderSidebar() {
     dom.folderTree.appendChild(row);
   };
 
-  const root = state.map.get(state.rootId);
-  const bar = state.map.get(state.bookmarksBarId);
-  const others = root?.children?.filter(node => node.folderType === "other") || [];
-  const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
-  const managed = root?.children?.filter(node => node.folderType === "managed") || [];
-
-  addSpecial(bar, "Главная", "home");
-  mobiles.forEach(folder => addSpecial(folder, "Мобильные", "mobile", false));
-
-  const roots = bar?.children?.filter(node => !node.url) || [];
-
-  function addFolder(folder) {
+  function addFolder(folder, allowActions = true) {
     const row = document.createElement("div");
     row.className = "folder-row";
     row.dataset.folderId = folder.id;
@@ -299,34 +288,61 @@ function renderSidebar() {
     button.append(icon, name);
     row.appendChild(button);
 
-    const more = document.createElement("button");
-    more.type = "button";
-    more.className = "more";
-    more.dataset.itemId = folder.id;
-    more.setAttribute("aria-haspopup", "menu");
-    more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»");
-    more.appendChild(createIcon("more"));
-    row.appendChild(more);
+    if (allowActions && canModifyNode(folder)) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "more";
+      more.dataset.itemId = folder.id;
+      more.setAttribute("aria-haspopup", "menu");
+      more.setAttribute("aria-expanded", "false");
+      more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»");
+      more.appendChild(createIcon("more"));
+      row.appendChild(more);
+    }
     dom.folderTree.appendChild(row);
 
-    if (!state.collapsedFolders.has(folder.id)) children.forEach(addFolder);
+    if (!state.collapsedFolders.has(folder.id)) {
+      children.forEach(child => addFolder(child, allowActions));
+    }
   }
 
-  roots.forEach(addFolder);
-  if (!roots.length) {
-    const empty = document.createElement("div");
-    empty.className = "folder-name";
-    empty.style.padding = "12px 10px";
-    empty.style.color = "var(--muted)";
-    empty.textContent = "Папок пока нет";
-    dom.folderTree.appendChild(empty);
-  }
+  const root = state.map.get(state.rootId);
+  const bar = state.map.get(state.bookmarksBarId);
+  const bars = root?.children?.filter(node => node.folderType === "bookmarks-bar") || [];
+  const visibleBars = bars.length ? bars : (bar ? [bar] : []);
+  const others = root?.children?.filter(node => node.folderType === "other") || [];
+  const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
+  const managed = root?.children?.filter(node => node.folderType === "managed") || [];
 
-  managed.forEach(folder => addSpecial(folder, getFolderDisplayTitle(folder), "folder", false));
-  others.forEach(folder => addSpecial(folder, "Другие", "bookmark", false));
+  visibleBars.forEach((folder, index) => {
+    const label = index === 0 ? "Главная" : folder.syncing ? "Главная (аккаунт)" : "Главная (локальная)";
+    addSpecial(folder, label, "home");
+    (folder.children?.filter(node => !node.url) || []).forEach(addFolder);
+    if (folder.id === state.bookmarksBarId && !(folder.children || []).some(node => !node.url)) {
+      const empty = document.createElement("div");
+      empty.className = "folder-name";
+      empty.style.padding = "12px 10px";
+      empty.style.color = "var(--muted)";
+      empty.textContent = "Папок пока нет";
+      dom.folderTree.appendChild(empty);
+    }
+  });
+
+  mobiles.forEach((folder, index) => {
+    const label = mobiles.length > 1 ? "Мобильные (" + (folder.syncing ? "аккаунт" : "локальные") + ")" : "Мобильные";
+    addSpecial(folder, label, "mobile", false);
+  });
+
+  managed.forEach(folder => {
+    addSpecial(folder, getFolderDisplayTitle(folder), "folder", false);
+    (folder.children?.filter(node => !node.url) || []).forEach(child => addFolder(child, false));
+  });
+
+  others.forEach((folder, index) => {
+    const label = others.length > 1 ? "Другие (" + (folder.syncing ? "аккаунт" : "локальные") + ")" : "Другие";
+    addSpecial(folder, label, "bookmark", false);
+  });
 }
-
 function clearSearchTimer() {
   clearTimeout(state.searchTimer);
   state.searchTimer = 0;
