@@ -2,6 +2,17 @@ export function getTitle(node) {
   return node?.title?.trim() || "Без названия";
 }
 
+export function isValidBookmarkUrl(url) {
+  if (typeof url !== "string" || !url.trim()) return false;
+  try {
+    const parsed = new URL(url.trim());
+    return !["javascript:", "data:", "vbscript:", "blob:"].includes(parsed.protocol)
+      && Boolean(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 export function isValidHttpUrl(url) {
   if (typeof url !== "string" || !url.trim()) return false;
   try {
