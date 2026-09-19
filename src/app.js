@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "./settings.js";
+import { DEFAULT_SETTINGS, loadSettings, normalizeSettings, saveSettings } from "./settings.js";
 import { buildMap, getFolderDisplayTitle, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidBookmarkUrl } from "./bookmarks-utils.js";
 import { createIcon } from "./icons.js";
 import { attachFavicon } from "./favicon.js";
@@ -8,7 +8,7 @@ const CARD_HEIGHT = { compact: 52, standard: 58, large: 68 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
-  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false, searchTimer: 0,
+  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false, searchTimer: 0, collapsedFolders: new Set(),
   menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
   moveSourceId: null, moveDestinationId: null, resizeObserver: null
 };
@@ -54,8 +54,10 @@ function calculateColumns() {
   const style = getComputedStyle(dom.bookmarks);
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(style.columnGap) || 18;
-  const minWidth = parseFloat(style.getPropertyValue("--card-min-width")) || 220;
-  return Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
+  const minWidth = parseFloat(style.getPropertyValue("--auto-min-width")) || 220;
+  const maxColumns = Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
+  const requested = Number(state.settings.columns) || 3;
+  return Math.min(requested, maxColumns);
 }
 
 function updateColumns() { dom.bookmarks.style.setProperty("--auto-columns", String(calculateColumns())); }
@@ -161,13 +163,47 @@ function folderDepth(folderId) {
   return Math.max(0, depth - 1);
 }
 
+function ensureCurrentFolderExpanded() {
+  let current = state.map.get(state.currentFolderId);
+  const seen = new Set();
+  while (current?.parentId && !seen.has(current.id)) {
+    seen.add(current.id);
+    if (current.parentId === state.bookmarksBarId) break;
+    state.collapsedFolders.delete(current.parentId);
+    current = state.map.get(current.parentId);
+  }
+}
+
+function hasSubfolders(folder) {
+  return Boolean(folder?.children?.some(child => !child.url));
+}
+
+function toggleFolderCollapsed(folderId) {
+  const folder = state.map.get(folderId);
+  if (!folder || !hasSubfolders(folder)) return;
+  const willCollapse = !state.collapsedFolders.has(folderId);
+  if (willCollapse && state.currentFolderId && state.currentFolderId !== folderId && isDescendantOrSelf(state.map, state.currentFolderId, folderId)) {
+    selectFolder(folderId);
+    return;
+  }
+  if (willCollapse) state.collapsedFolders.add(folderId);
+  else state.collapsedFolders.delete(folderId);
+  renderSidebar();
+}
+
 function renderSidebar() {
   dom.folderTree.replaceChildren();
+  ensureCurrentFolderExpanded();
 
   const addSpecial = (folder, label, icon = "folder") => {
     if (!folder) return;
     const row = document.createElement("div");
     row.className = "folder-row";
+    row.dataset.folderId = folder.id;
+    const spacer = document.createElement("span");
+    spacer.className = "folder-toggle-spacer";
+    row.appendChild(spacer);
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "folder-button";
@@ -176,10 +212,13 @@ function renderSidebar() {
       button.classList.add("active");
       button.setAttribute("aria-current", "page");
     }
+
     const iconNode = createIcon(icon);
     const name = document.createElement("span");
     name.className = "folder-name";
     name.textContent = label;
+    name.title = label;
+    button.title = label;
     button.append(iconNode, name);
     row.appendChild(button);
     dom.folderTree.appendChild(row);
@@ -196,22 +235,62 @@ function renderSidebar() {
   const roots = bar?.children?.filter(node => !node.url) || [];
 
   function addFolder(folder) {
-    const row = document.createElement("div"); row.className = "folder-row";
-    const button = document.createElement("button"); button.type = "button"; button.className = "folder-button"; button.dataset.folderId = folder.id;
-    button.style.paddingLeft = String(10 + Math.min(7, folderDepth(folder.id)) * 14) + "px";
+    const row = document.createElement("div");
+    row.className = "folder-row";
+    row.dataset.folderId = folder.id;
+    row.style.paddingLeft = String(Math.min(7, folderDepth(folder.id)) * 14) + "px";
+
+    const children = folder.children?.filter(node => !node.url) || [];
+    if (children.length) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "folder-toggle";
+      toggle.dataset.folderToggle = folder.id;
+      toggle.setAttribute("aria-expanded", String(!state.collapsedFolders.has(folder.id)));
+      toggle.setAttribute("aria-label", (state.collapsedFolders.has(folder.id) ? "Развернуть" : "Свернуть") + " папку «" + getTitle(folder) + "»");
+      toggle.appendChild(createIcon("chevron"));
+      row.appendChild(toggle);
+    } else {
+      const spacer = document.createElement("span");
+      spacer.className = "folder-toggle-spacer";
+      row.appendChild(spacer);
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "folder-button";
+    button.dataset.folderId = folder.id;
+    button.style.paddingLeft = "7px";
     if (folder.id === state.currentFolderId && !state.searchQuery) {
       button.classList.add("active");
       button.setAttribute("aria-current", "page");
     }
+
     const icon = createIcon("folder");
-    const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
-    button.append(icon, name); row.appendChild(button);
-    const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
-    for (const child of folder.children || []) {
-      if (!child.url) addFolder(child);
+    const name = document.createElement("span");
+    name.className = "folder-name";
+    name.textContent = getTitle(folder);
+    name.title = getTitle(folder);
+    button.title = getTitle(folder);
+    button.append(icon, name);
+    row.appendChild(button);
+
+    const more = document.createElement("button");
+    more.type = "button";
+    more.className = "more";
+    more.dataset.itemId = folder.id;
+    more.setAttribute("aria-haspopup", "menu");
+    more.setAttribute("aria-expanded", "false");
+    more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»");
+    more.appendChild(createIcon("more"));
+    row.appendChild(more);
+    dom.folderTree.appendChild(row);
+
+    if (!state.collapsedFolders.has(folder.id)) {
+      children.forEach(addFolder);
     }
   }
+
   roots.forEach(addFolder);
   if (!roots.length) {
     const empty = document.createElement("div");
@@ -224,8 +303,14 @@ function renderSidebar() {
   addSpecial(other, "Другие", "bookmark");
 }
 
+function clearSearchTimer() {
+  clearTimeout(state.searchTimer);
+  state.searchTimer = 0;
+}
+
 function selectFolder(folderId) {
   if (!state.map.has(folderId)) return;
+  clearSearchTimer();
   showSettings(false);
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
   dom.bookmarkPanel.scrollTop = 0;
@@ -235,6 +320,7 @@ function selectFolder(folderId) {
 }
 
 function showSearch(query) {
+  clearSearchTimer();
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
   dom.bookmarkPanel.scrollTop = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
@@ -242,6 +328,7 @@ function showSearch(query) {
 }
 
 function showSettings(show) {
+  clearSearchTimer();
   dom.settingsPanel.classList.toggle("hidden", !show); dom.bookmarkPanel.classList.toggle("hidden", show);
   dom.settingsButton.setAttribute("aria-pressed", String(show));
   if (show) {
@@ -256,9 +343,23 @@ function showSettings(show) {
   }
 }
 
-async function persistSettings() {
-  state.settings = await saveSettings(state.settings); applyTheme(); applyVisualSettings();
-  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0; scheduleRender(true);
+let settingsWritePromise = Promise.resolve();
+
+function persistSettings() {
+  state.settings = normalizeSettings(state.settings);
+  applyTheme();
+  applyVisualSettings();
+  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId });
+  state.virtualStart = 0;
+  state.virtualEnd = 0;
+  scheduleRender(true);
+
+  const snapshot = { ...state.settings };
+  settingsWritePromise = settingsWritePromise
+    .catch(() => {})
+    .then(() => saveSettings(snapshot))
+    .catch(error => console.warn("Chrome Page settings save failed.", error));
+  return settingsWritePromise;
 }
 
 function openInputDialog({ title, label, value = "", type = "text", validate }) {
@@ -377,6 +478,8 @@ async function executeAction(action) {
 
 function openMenu(card, x, y, trigger = null) {
   const id = card?.dataset?.itemId || card?.dataset?.folderId; if (!id || !state.map.has(id)) return;
+  const node = state.map.get(id);
+  if (node.folderType) return;
   state.menuTargetId = id; state.menuTrigger = trigger; if (trigger) trigger.setAttribute("aria-expanded", "true");
   const node = state.map.get(id); dom.menu.querySelector('[data-action="edit"]').classList.toggle("hidden", !node.url);
   dom.menu.classList.remove("hidden");
@@ -460,6 +563,13 @@ function setupEvents() {
   dom.folderTree.addEventListener("click", event => {
     const more = event.target.closest(".more");
     if (more) { event.preventDefault(); event.stopPropagation(); const row = more.closest(".folder-row"); openMenu({ dataset: { itemId: row?.querySelector("[data-item-id]")?.dataset.itemId || more.dataset.itemId } }, more.getBoundingClientRect().left, more.getBoundingClientRect().bottom + 4, more); return; }
+    const toggle = event.target.closest("[data-folder-toggle]");
+    if (toggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFolderCollapsed(toggle.dataset.folderToggle);
+      return;
+    }
     const button = event.target.closest(".folder-button"); if (button) selectFolder(button.dataset.folderId);
   });
 
@@ -484,11 +594,18 @@ function setupEvents() {
   });
 
   dom.search.addEventListener("input", event => {
-    clearTimeout(state.searchTimer);
+    clearSearchTimer();
     const value = event.target.value;
-    state.searchTimer = setTimeout(() => showSearch(value), 80);
+    state.searchTimer = setTimeout(() => {
+      state.searchTimer = 0;
+      showSearch(value);
+    }, 80);
   });
-  dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
+  dom.searchClear.addEventListener("click", () => {
+    clearSearchTimer();
+    showSearch("");
+    dom.search.focus();
+  });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
   dom.newtabToggle.addEventListener("change", e => { state.settings.openInNewTab = e.target.checked; void persistSettings(); });
@@ -530,5 +647,5 @@ function setupEvents() {
 }
 
 async function init() { state.settings = await loadSettings(); applyTheme(); applyVisualSettings(); setupEvents(); await refresh(); }
-window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearTimeout(state.searchTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
+window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearSearchTimer(); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
 void init().catch(error => console.error("Chrome Page init failed:", error));
