@@ -240,7 +240,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:none}
-.folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.95;stroke:none}
+.folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.9}
 .folder-name{
   min-width:0;
   overflow:hidden;
@@ -495,7 +495,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   color:var(--accent);
 }
 .folder-card .favicon .icon{width:32px;height:32px}
-.folder-card .folder-icon .icon{fill:none;stroke:none}
 
 .empty-message{
   grid-column:1/-1;
@@ -758,6 +757,8 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   .card .more{opacity:1}
   .settings-card{padding:16px;border-radius:13px}
   .settings-panel{padding:9px}
+  .setting-item{align-items:flex-start;flex-direction:column;gap:8px}
+  .options{width:100%}
   .card-link{gap:8px;padding:5px 40px 5px 8px}
   .favicon{border-radius:9px}
 }
