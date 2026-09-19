@@ -500,9 +500,6 @@ function setupEvents() {
   state.resizeObserver = new ResizeObserver(() => { updateColumns(); scheduleRender(true); });
   state.resizeObserver.observe(dom.bookmarks);
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
-  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
-    if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
-  });
   chrome.runtime.onMessage.addListener(message => { if (!state.destroyed && message?.type?.startsWith("BOOKMARK")) applyBookmarkEvent(message); });
 }
 
