@@ -15,8 +15,6 @@
   --accent-border:rgba(91,92,226,.26);
   --danger:#c83d32;
   --shadow:0 10px 35px rgba(26,31,44,.06),0 2px 7px rgba(26,31,44,.035);
-  --shadow-card:0 1px 2px rgba(26,31,44,.025);
-  --shadow-card-hover:none;
   --gap:8px;
   --radius:10px;
   --transition:.2s cubic-bezier(.2,.65,.25,1);
@@ -39,8 +37,6 @@ html[data-theme=dark]{
   --accent-border:rgba(141,136,255,.3);
   --danger:#f08479;
   --shadow:0 22px 60px rgba(0,0,0,.38),0 4px 14px rgba(0,0,0,.2);
-  --shadow-card:0 1px 2px rgba(0,0,0,.10);
-  --shadow-card-hover:none;
 }
 @media (prefers-color-scheme:dark){
   html[data-theme=system]{
@@ -60,8 +56,6 @@ html[data-theme=dark]{
     --accent-border:rgba(141,136,255,.3);
     --danger:#f08479;
     --shadow:0 18px 48px rgba(0,0,0,.28),0 1px 2px rgba(0,0,0,.14);
-    --shadow-card:0 1px 2px rgba(0,0,0,.08);
-    --shadow-card-hover:none;
   }
   html[data-theme=system] .orb-a{background:rgba(105,102,235,.16)}
   html[data-theme=system] .orb-b{background:rgba(147,103,221,.12)}
@@ -119,8 +113,8 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   min-width:0;
   border:1px solid var(--border);
   background:rgba(var(--surface),var(--alpha));
-  backdrop-filter:blur(calc(var(--blur) + 4px)) saturate(125%);
-  -webkit-backdrop-filter:blur(calc(var(--blur) + 4px)) saturate(125%);
+  backdrop-filter:blur(18px) saturate(125%);
+  -webkit-backdrop-filter:blur(18px) saturate(125%);
   box-shadow:var(--shadow);
 }
 .sidebar{
@@ -159,7 +153,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   border:1px solid var(--border);
   border-radius:12px;
   background:rgba(var(--surface),.64);
-  box-shadow:0 1px 0 var(--glass-highlight) inset;
+  box-shadow:none;
   transition:border-color var(--transition),box-shadow var(--transition),background var(--transition),transform var(--transition);
 }
 .search-sidebar:focus-within{
@@ -246,7 +240,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:none}
-.folder-button>.icon{width:17px;height:17px;color:currentColor;opacity:.72}
+.folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.95;stroke:none}
 .folder-name{
   min-width:0;
   overflow:hidden;
@@ -483,7 +477,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   display:block;
   min-width:0;
   width:100%;
-  min-width:0;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -594,6 +587,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   border-color:var(--accent-border);
   color:var(--active-text);
 }
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-width:0}
 .toggle-row>span{display:flex;flex-direction:column;gap:3px;min-width:0}
 .toggle-row strong{font-weight:620}
 .toggle-row small{color:var(--muted);font-size:10px}
@@ -777,7 +771,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 
 @media (min-width:1400px){
   .bookmarks[data-columns=auto]{
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    --card-min-width:240px;
   }
 }
 @media (max-width:1100px){
