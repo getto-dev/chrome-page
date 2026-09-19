@@ -783,9 +783,6 @@ html[data-ambient=false] .ambient{display:none}
   .settings-panel{padding:9px}
   .card-link{gap:8px;padding:5px 40px 5px 8px}
   .favicon{border-radius:9px}
-  .toggle-row,.range-row,.color-row{align-items:flex-start;flex-wrap:wrap}
-  .range-row span,.color-row span{min-width:100%}
-  .color-row input{margin-left:0}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{
