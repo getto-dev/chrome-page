@@ -230,7 +230,7 @@ function selectFolder(folderId) {
 function showSearch(query) {
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
   dom.bookmarkPanel.scrollTop = 0;
-  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
+  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
   state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
 
@@ -408,7 +408,7 @@ function removeFromMap(id) {
 function rerenderAfterDataChange() {
   if (state.currentFolderId && !state.map.has(state.currentFolderId)) state.currentFolderId = state.bookmarksBarId;
   renderSidebar(); state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
-  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId));
+  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
   renderBreadcrumbs(); scheduleRender(true);
 }
 
