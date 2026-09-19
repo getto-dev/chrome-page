@@ -244,16 +244,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   color:var(--muted);
   transition:background var(--transition),color var(--transition),border-color var(--transition);
 }
-.folder-button::before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:8px;
-  bottom:8px;
-  width:2px;
-  border-radius:999px;
-  background:transparent;
-}
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:none}
 .folder-button>.icon{width:17px;height:17px;color:currentColor;opacity:.72}
@@ -271,7 +261,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   border-color:transparent;
   box-shadow:none;
 }
-.folder-button.active::before{background:var(--accent)}
 .folder-button.active>.icon{opacity:.95}
 .folder-row>.more{opacity:0}
 .folder-row:hover>.more,.folder-row>.more:focus-visible{opacity:1}
