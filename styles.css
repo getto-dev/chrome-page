@@ -17,12 +17,10 @@
   --shadow:0 10px 35px rgba(26,31,44,.06),0 2px 7px rgba(26,31,44,.035);
   --shadow-card:0 1px 2px rgba(26,31,44,.025);
   --shadow-card-hover:none;
-  --blur:18px;
   --gap:8px;
   --radius:10px;
   --transition:.2s cubic-bezier(.2,.65,.25,1);
   --font-sans:Inter, "SF Pro Display", "SF Pro Text", Geist, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --glass-highlight:rgba(255,255,255,.055);
 }
 html[data-theme=dark]{
   --bg:10,12,17;
@@ -106,9 +104,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 html[data-theme=dark] .orb-a{background:rgba(110,106,240,.14)}
 html[data-theme=dark] .orb-b{background:rgba(157,113,223,.095)}
 html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
-html[data-blur=soft]{--blur:10px}
-html[data-blur=strong]{--blur:18px}
-html[data-ambient=false] .ambient{display:none}
 
 .shell{
   position:relative;
@@ -126,7 +121,7 @@ html[data-ambient=false] .ambient{display:none}
   background:rgba(var(--surface),var(--alpha));
   backdrop-filter:blur(calc(var(--blur) + 4px)) saturate(125%);
   -webkit-backdrop-filter:blur(calc(var(--blur) + 4px)) saturate(125%);
-  box-shadow:var(--shadow),0 1px 0 var(--glass-highlight) inset;
+  box-shadow:var(--shadow);
 }
 .sidebar{
   position:relative;
@@ -639,22 +634,6 @@ html[data-ambient=false] .ambient{display:none}
 }
 .toggle-row input:checked{background:var(--accent)}
 .toggle-row input:checked::before{transform:translateX(16px)}
-.range-row{justify-content:flex-start}
-.range-row span{min-width:145px;font-weight:550}
-.range-row input{flex:1;accent-color:var(--accent)}
-.range-row output{min-width:42px;text-align:right;color:var(--text);font-variant-numeric:tabular-nums;font-weight:650}
-.color-row{justify-content:flex-start}
-.color-row span{min-width:145px;font-weight:550}
-.color-row input{
-  margin-left:auto;
-  width:44px;
-  height:28px;
-  padding:2px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:transparent;
-}
-
 .popup{
   position:fixed;
   z-index:30;
