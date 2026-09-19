@@ -10,7 +10,7 @@ const state = {
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
   destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false,
   menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
-  moveSourceId: null, moveDestinationId: null, settingsSaveTimer: 0, resizeObserver: null
+  moveSourceId: null, moveDestinationId: null, resizeObserver: null
 };
 
 const $ = id => document.getElementById(id);
