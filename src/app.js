@@ -155,7 +155,10 @@ function createFolderCard(folder) {
 function folderTrail(folderId) {
   const result = []; const seen = new Set(); let current = state.map.get(folderId);
   while (current && !seen.has(current.id)) {
-    seen.add(current.id); result.push({ id: current.id, title: current.id === state.bookmarksBarId ? "Главная" : getTitle(current) });
+    seen.add(current.id);
+    if (current.id !== state.rootId) {
+      result.push({ id: current.id, title: current.id === state.bookmarksBarId ? "Главная" : getTitle(current) });
+    }
     current = current.parentId ? state.map.get(current.parentId) : null;
   }
   return result.reverse();
