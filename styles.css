@@ -460,9 +460,9 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   flex:none;
   width:var(--favicon-size);
   height:var(--favicon-size);
-  border:1px solid var(--border);
-  border-radius:9px;
-  background:rgba(var(--surface),.7);
+  border:0;
+  border-radius:0;
+  background:transparent;
   overflow:hidden;
   font-size:10px;
   font-weight:750;
@@ -494,11 +494,11 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 .bookmark-card .favicon{color:var(--accent)}
 .folder-card .favicon{
-  background:var(--accent-soft);
-  border-color:var(--accent-border);
+  background:transparent;
+  border-color:transparent;
   color:var(--accent);
 }
-.folder-card .favicon .icon{width:17px;height:17px}
+.folder-card .favicon .icon{width:32px;height:32px}
 
 .empty-message{
   grid-column:1/-1;
