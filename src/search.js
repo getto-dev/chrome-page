@@ -4,13 +4,21 @@ export function getSearchResults(map, query, bookmarksBarId) {
   const q = query.trim().toLocaleLowerCase();
   if (!q) return [];
 
+  const pathCache = new Map();
+  const getPath = folderId => {
+    if (pathCache.has(folderId)) return pathCache.get(folderId);
+    const path = getFolderPath(map, folderId, bookmarksBarId).toLocaleLowerCase();
+    pathCache.set(folderId, path);
+    return path;
+  };
+
   return [...map.values()]
     .filter(node => Boolean(node.url))
     .map(bookmark => {
       const title = getTitle(bookmark).toLocaleLowerCase();
       const url = String(bookmark.url || "").toLocaleLowerCase();
       const hostname = getHostname(bookmark.url || "").toLocaleLowerCase();
-      const path = getFolderPath(map, bookmark.parentId, bookmarksBarId).toLocaleLowerCase();
+      const path = getPath(bookmark.parentId);
       const score =
         title === q ? 0 :
         title.startsWith(q) ? 10 :
