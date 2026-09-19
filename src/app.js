@@ -28,16 +28,6 @@ const dom = {
   bookmarkTemplate: $("bookmark-template"), folderTemplate: $("folder-template")
 };
 
-function clampOpacity(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.max(55, Math.min(100, Math.round(n / 5) * 5)) : 78;
-}
-
-function hexToRgb(hex) {
-  if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return "";
-  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)].join(", ");
-}
-
 function applyTheme() {
   dom.html.dataset.theme = state.settings.theme;
 }
