@@ -130,6 +130,7 @@ function createFolderCard(folder) {
   const title = getDisplayFolderTitle(folder);
   card.dataset.folderId = folder.id; card.dataset.itemId = folder.id;
   button.querySelector(".card-title").textContent = title;
+  button.title = title;
   more.setAttribute("aria-label", "Действия папки «" + title + "»");
   if (folder.folderType) more.classList.add("hidden");
   return card;
