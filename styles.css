@@ -18,7 +18,7 @@
   --shadow-card:0 1px 2px rgba(26,31,44,.025);
   --shadow-card-hover:none;
   --blur:18px;
-  --gap:9px;
+  --gap:8px;
   --radius:10px;
   --transition:.2s cubic-bezier(.2,.65,.25,1);
   --font-sans:Inter, "SF Pro Display", "SF Pro Text", Geist, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -362,8 +362,8 @@ html[data-ambient=false] .ambient{display:none}
   align-items:center;
   gap:16px;
   justify-content:space-between;
-  min-height:62px;
-  padding:10px 16px 9px;
+  min-height:60px;
+  padding:9px 15px 8px;
   border-bottom:1px solid var(--border);
   background:transparent;
   box-shadow:none;
@@ -405,15 +405,15 @@ html[data-ambient=false] .ambient{display:none}
 .crumb.current{font-weight:620;color:var(--muted)}
 .breadcrumbs>span:not(.current){color:var(--muted-2)}
 
-.content-panel{flex:1;min-height:0;overflow:auto;padding:12px 14px 18px}
+.content-panel{flex:1;min-height:0;overflow:auto;padding:11px 13px 18px}
 .bookmarks{
   --auto-columns:3;
-  --card-min-width:200px;
+  --card-min-width:240px;
   --card-height:58px;
   --favicon-size:32px;
   --title-size:13.5px;
   display:grid;
-  grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));
+  grid-template-columns:repeat(var(--auto-columns,3),minmax(var(--card-min-width),1fr));
   gap:var(--gap);
   align-content:start;
   contain:layout;
@@ -490,6 +490,7 @@ html[data-ambient=false] .ambient{display:none}
   display:block;
   min-width:0;
   width:100%;
+  min-width:0;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -794,3 +795,14 @@ html[data-ambient=false] .ambient{display:none}
   }
 }
 
+
+@media (min-width:1400px){
+  .bookmarks[data-columns=auto]{
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  }
+}
+@media (max-width:1100px){
+  .bookmarks{
+    --card-min-width:210px;
+  }
+}
