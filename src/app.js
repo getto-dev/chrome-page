@@ -136,7 +136,7 @@ function createFolderCard(folder) {
   button.querySelector(".card-title").textContent = title;
   button.title = title;
   more.setAttribute("aria-label", "Действия папки «" + title + "»");
-  if (folder.folderType) more.classList.add("hidden");
+  if (!canModifyNode(folder)) more.classList.add("hidden");
   return card;
 }
 
@@ -430,11 +430,22 @@ function closeDialog(result = null) {
 
 function getMoveFolders(sourceId) {
   const source = state.map.get(sourceId); const q = dom.moveSearch.value.trim().toLocaleLowerCase();
+  if (!source) return [];
+  const pathCache = new Map();
+  const getPath = folder => {
+    if (pathCache.has(folder.id)) return pathCache.get(folder.id);
+    const path = getFolderPath(state.map, folder.id, state.bookmarksBarId);
+    pathCache.set(folder.id, path);
+    return path;
+  };
+
   return [...state.map.values()]
     .filter(node => !node.url && node.parentId)
-    .filter(folder => source && canModifyNode(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
-    .filter(folder => { const path = getFolderPath(state.map, folder.id, state.bookmarksBarId).toLocaleLowerCase(); return !q || getTitle(folder).toLocaleLowerCase().includes(q) || path.includes(q); })
-    .sort((a, b) => getFolderPath(state.map, a.id, state.bookmarksBarId).localeCompare(getFolderPath(state.map, b.id, state.bookmarksBarId), undefined, { sensitivity: "base", numeric: true }));
+    .filter(folder => canModifyNode(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
+    .map(folder => ({ folder, title: getTitle(folder).toLocaleLowerCase(), path: getPath(folder) }))
+    .filter(entry => !q || entry.title.includes(q) || entry.path.toLocaleLowerCase().includes(q))
+    .sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: "base", numeric: true }))
+    .map(entry => entry.folder);
 }
 
 function renderMoveFolders() {
@@ -532,7 +543,10 @@ function removeFromParent(node) {
 }
 
 function removeFromMap(id) {
-  const node = state.map.get(id); if (!node) return; for (const child of node.children || []) removeFromMap(child.id); state.map.delete(id);
+  const node = state.map.get(id); if (!node) return;
+  state.collapsedFolders.delete(id);
+  for (const child of node.children || []) removeFromMap(child.id);
+  state.map.delete(id);
 }
 
 function rerenderAfterDataChange({ sidebar = false } = {}) {
