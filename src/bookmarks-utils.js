@@ -2,6 +2,17 @@ export function getTitle(node) {
   return node?.title?.trim() || "Без названия";
 }
 
+export function isValidBookmarkUrl(url) {
+  if (typeof url !== "string" || !url.trim()) return false;
+  try {
+    const parsed = new URL(url.trim());
+    return !["javascript:", "data:", "vbscript:", "blob:"].includes(parsed.protocol)
+      && Boolean(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 export function isValidHttpUrl(url) {
   if (typeof url !== "string" || !url.trim()) return false;
   try {
@@ -21,6 +32,14 @@ export function getHostname(url) {
   }
 }
 
+export function getFolderDisplayTitle(node, bookmarksBarId = null) {
+  if (!node) return "";
+  if (node.id === bookmarksBarId || node.folderType === "bookmarks-bar") return "Главная";
+  if (node.folderType === "other") return "Другие";
+  if (node.folderType === "mobile") return "Мобильные";
+  return getTitle(node);
+}
+
 export function getFolderPath(map, folderId, rootId) {
   const parts = [];
   const visited = new Set();
@@ -32,7 +51,8 @@ export function getFolderPath(map, folderId, rootId) {
       parts.push("Главная");
       break;
     }
-    parts.push(getTitle(current));
+    parts.push(getFolderDisplayTitle(current, rootId));
+    if (current.folderType === "other" || current.folderType === "mobile") break;
     current = current.parentId ? map.get(current.parentId) : null;
   }
 

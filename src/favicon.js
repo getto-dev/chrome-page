@@ -1,6 +1,7 @@
 import { createFallbackFavicon, isValidHttpUrl } from "./bookmarks-utils.js";
 
 const MIN_FAVICON_SIZE = 24;
+const FAVICON_REQUEST_SIZE = 64;
 const faviconSources = new Map();
 const faviconSourcePromises = new Map();
 let missingFaviconSignaturePromise = null;
@@ -65,7 +66,7 @@ function getMissingFaviconSignature() {
     try {
       const faviconUrl = new URL(chrome.runtime.getURL("_favicon/"));
       faviconUrl.searchParams.set("pageUrl", "https://chrome-page-favicon-probe.invalid/");
-      faviconUrl.searchParams.set("size", "32");
+      faviconUrl.searchParams.set("size", String(FAVICON_REQUEST_SIZE));
       image.src = faviconUrl.toString();
     } catch {
       resolve("");

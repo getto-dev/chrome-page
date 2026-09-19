@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "./settings.js";
-import { buildMap, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidHttpUrl } from "./bookmarks-utils.js";
+import { buildMap, getFolderDisplayTitle, getFolderPath, getHostname, getTitle, isDescendantOrSelf, isValidBookmarkUrl } from "./bookmarks-utils.js";
 import { createIcon } from "./icons.js";
 import { attachFavicon } from "./favicon.js";
 import { getCurrentChildren } from "./search.js";
@@ -8,9 +8,9 @@ const CARD_HEIGHT = { compact: 52, standard: 58, large: 68 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
-  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0,
+  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false,
   menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
-  moveSourceId: null, moveDestinationId: null, settingsSaveTimer: 0, resizeObserver: null
+  moveSourceId: null, moveDestinationId: null, resizeObserver: null
 };
 
 const $ = id => document.getElementById(id);
@@ -42,6 +42,7 @@ function applyVisualSettings() {
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", String(active));
   });
+  if (dom.newtabToggle) dom.newtabToggle.checked = Boolean(state.settings.openInNewTab);
   const searchKbd = $("search-kbd");
   if (searchKbd) searchKbd.textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘ K" : "Ctrl K";
 }
@@ -54,13 +55,20 @@ function calculateColumns() {
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(style.columnGap) || 18;
   const minWidth = parseFloat(style.getPropertyValue("--card-min-width")) || 220;
-  return Math.max(1, Math.min(4, Math.floor((width + gap) / (minWidth + gap))));
+  return Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
 }
 
 function updateColumns() { dom.bookmarks.style.setProperty("--auto-columns", String(calculateColumns())); }
 function scheduleRender(force = false) {
-  if (state.destroyed || state.renderFrame) return;
-  state.renderFrame = requestAnimationFrame(() => { state.renderFrame = 0; renderBookmarks(force); });
+  if (state.destroyed) return;
+  state.renderForce = state.renderForce || force;
+  if (state.renderFrame) return;
+  state.renderFrame = requestAnimationFrame(() => {
+    state.renderFrame = 0;
+    const renderForce = state.renderForce;
+    state.renderForce = false;
+    renderBookmarks(renderForce);
+  });
 }
 
 function visibleRange() {
@@ -96,11 +104,7 @@ function renderBookmarks(force = false) {
 }
 
 function getDisplayFolderTitle(folder) {
-  if (!folder) return "";
-  if (folder.id === state.bookmarksBarId) return "Главная";
-  if (folder.folderType === "other") return "Другие";
-  if (folder.folderType === "mobile") return "Мобильные";
-  return getTitle(folder);
+  return getFolderDisplayTitle(folder, state.bookmarksBarId);
 }
 
 function createBookmarkCard(bookmark) {
@@ -109,7 +113,7 @@ function createBookmarkCard(bookmark) {
   const title = getTitle(bookmark); const url = typeof bookmark.url === "string" ? bookmark.url.trim() : "";
   const host = getHostname(url);
   card.dataset.bookmarkId = bookmark.id; card.dataset.itemId = bookmark.id;
-  link.href = isValidHttpUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
+  link.href = isValidBookmarkUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
   if (state.settings.openInNewTab) link.rel = "noopener noreferrer";
   link.querySelector(".card-title").textContent = title;
   link.title = title;
@@ -203,7 +207,7 @@ function renderSidebar() {
     const name = document.createElement("span"); name.className = "folder-name"; name.textContent = getTitle(folder);
     button.append(icon, name); row.appendChild(button);
     const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
+    more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
   }
   roots.forEach(addFolder);
   if (!roots.length) {
@@ -313,7 +317,7 @@ function renderMoveFolders() {
   dom.moveList.replaceChildren(); const folders = getMoveFolders(state.moveSourceId);
   for (const folder of folders) {
     const button = document.createElement("button"); button.type = "button"; button.className = "move-option"; button.dataset.folderId = folder.id;
-    button.style.paddingLeft = String(10 + folderDepth(folder.id) * 16) + "px"; button.textContent = getTitle(folder);
+    button.style.paddingLeft = String(10 + folderDepth(folder.id) * 16) + "px"; button.textContent = getDisplayFolderTitle(folder);
     if (folder.id === state.moveDestinationId) {
       button.classList.add("selected");
       button.setAttribute("aria-selected", "true");
@@ -356,7 +360,7 @@ async function executeAction(action) {
       if (value !== null) await chrome.bookmarks.update(id, { title: value.trim() });
     }
     if (action === "edit" && node.url) {
-      const value = await openInputDialog({ title: "Изменить URL", label: "Адрес", value: node.url, type: "url", validate: v => isValidHttpUrl(v) ? "" : "Нужен корректный URL http или https." });
+      const value = await openInputDialog({ title: "Изменить URL", label: "Адрес", value: node.url, type: "url", validate: v => isValidBookmarkUrl(v) ? "" : "Нужен корректный URL." });
       if (value !== null) await chrome.bookmarks.update(id, { url: value.trim() });
     }
     if (action === "move") { openMoveDialog(id); return; }
@@ -519,5 +523,5 @@ function setupEvents() {
 }
 
 async function init() { state.settings = await loadSettings(); applyTheme(); applyVisualSettings(); setupEvents(); await refresh(); }
-window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearTimeout(state.settingsSaveTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
+window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
 void init().catch(error => console.error("Chrome Page init failed:", error));
