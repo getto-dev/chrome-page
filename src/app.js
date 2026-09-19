@@ -19,9 +19,7 @@ const dom = {
   folderTitle: $("folder-title"), breadcrumbs: $("breadcrumbs"), bookmarks: $("bookmarks"),
   bookmarkPanel: $("bookmark-panel"), settingsPanel: $("settings-panel"), search: $("search"),
   searchClear: $("search-clear"), settingsButton: $("settings-button"),
-  managerButton: $("manager-button"), ambientToggle: $("ambient-toggle"),
-  opacity: $("opacity"), opacityValue: $("opacity-value"), backgroundColor: $("background-color"),
-  resetBackground: $("reset-background"), newtabToggle: $("newtab-toggle"), menu: $("menu"),
+  managerButton: $("manager-button"), newtabToggle: $("newtab-toggle"), menu: $("menu"),
   dialog: $("dialog"), dialogTitle: $("dialog-title"), dialogMessage: $("dialog-message"),
   dialogField: $("dialog-field"), dialogLabel: $("dialog-label"), dialogInput: $("dialog-input"),
   dialogError: $("dialog-error"), dialogCancel: $("dialog-cancel"), dialogSubmit: $("dialog-submit"),
@@ -30,40 +28,14 @@ const dom = {
   bookmarkTemplate: $("bookmark-template"), folderTemplate: $("folder-template")
 };
 
-function clampOpacity(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.max(55, Math.min(100, Math.round(n / 5) * 5)) : 78;
-}
-
-function hexToRgb(hex) {
-  if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return "";
-  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)].join(", ");
-}
-
 function applyTheme() {
   dom.html.dataset.theme = state.settings.theme;
 }
 
 function applyVisualSettings() {
-  dom.html.dataset.blur = state.settings.blur;
-  dom.html.dataset.ambient = String(state.settings.ambient);
-  dom.html.style.setProperty("--alpha", String(state.settings.surfaceOpacity / 100));
   dom.bookmarks.dataset.columns = String(state.settings.columns);
   dom.bookmarks.dataset.size = state.settings.cardSize;
   dom.bookmarks.dataset.spacing = state.settings.spacing;
-  dom.bookmarks.dataset.radius = state.settings.radius;
-  dom.opacity.value = String(state.settings.surfaceOpacity);
-  dom.opacityValue.textContent = String(state.settings.surfaceOpacity) + "%";
-  dom.ambientToggle.checked = state.settings.ambient;
-  dom.newtabToggle.checked = state.settings.openInNewTab;
-  if (state.settings.backgroundColor) {
-    dom.html.style.setProperty("--bg", hexToRgb(state.settings.backgroundColor));
-    dom.backgroundColor.value = state.settings.backgroundColor;
-  } else {
-    dom.html.style.removeProperty("--bg");
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    dom.backgroundColor.value = prefersDark || state.settings.theme === "dark" ? "#080a0f" : "#f5f5f7";
-  }
   document.querySelectorAll("[data-setting] button").forEach(button => {
     const key = button.closest("[data-setting]")?.dataset.setting;
     const active = Boolean(key && String(state.settings[key]) === button.dataset.value);
@@ -493,10 +465,6 @@ function setupEvents() {
   dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
-  dom.ambientToggle.addEventListener("change", e => { state.settings.ambient = e.target.checked; void persistSettings(); });
-  dom.opacity.addEventListener("input", e => { state.settings.surfaceOpacity = clampOpacity(e.target.value); applyVisualSettings(); clearTimeout(state.settingsSaveTimer); state.settingsSaveTimer = setTimeout(() => void saveSettings(state.settings), 120); });
-  dom.backgroundColor.addEventListener("input", e => { state.settings.backgroundColor = e.target.value; applyVisualSettings(); clearTimeout(state.settingsSaveTimer); state.settingsSaveTimer = setTimeout(() => void saveSettings(state.settings), 120); });
-  dom.resetBackground.addEventListener("click", () => { state.settings.backgroundColor = null; state.settings.surfaceOpacity = DEFAULT_SETTINGS.surfaceOpacity; void persistSettings(); });
   dom.newtabToggle.addEventListener("change", e => { state.settings.openInNewTab = e.target.checked; void persistSettings(); });
   dom.breadcrumbs.addEventListener("click", e => { const button = e.target.closest("[data-folder-id]"); if (button) selectFolder(button.dataset.folderId); });
   dom.dialogCancel.addEventListener("click", () => closeDialog(null));
@@ -532,9 +500,6 @@ function setupEvents() {
   state.resizeObserver = new ResizeObserver(() => { updateColumns(); scheduleRender(true); });
   state.resizeObserver.observe(dom.bookmarks);
   window.addEventListener("resize", () => { updateColumns(); scheduleRender(true); }, { passive: true });
-  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", () => {
-    if (!state.settings.backgroundColor && state.settings.theme === "system") applyVisualSettings();
-  });
   chrome.runtime.onMessage.addListener(message => { if (!state.destroyed && message?.type?.startsWith("BOOKMARK")) applyBookmarkEvent(message); });
 }
 
