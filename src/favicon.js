@@ -4,6 +4,7 @@ const MIN_FAVICON_SIZE = 24;
 const FAVICON_REQUEST_SIZE = 64;
 const faviconSources = new Map();
 const faviconSourcePromises = new Map();
+const faviconControllers = new WeakMap();
 let missingFaviconSignaturePromise = null;
 
 function fallbackLetter(title, url) {
@@ -123,6 +124,9 @@ function loadFaviconSource(host, url) {
 }
 
 export async function attachFavicon(container, url, host, title = "") {
+  faviconControllers.get(container)?.abort();
+  const controller = new AbortController();
+  faviconControllers.set(container, controller);
   container.replaceChildren();
 
   if (!isValidHttpUrl(url)) {
@@ -131,6 +135,7 @@ export async function attachFavicon(container, url, host, title = "") {
   }
 
   const source = await loadFaviconSource(host, url);
+  if (controller.signal.aborted) return;
   if (!source) {
     renderFallback(container, title, host, url);
     return;
@@ -143,7 +148,7 @@ export async function attachFavicon(container, url, host, title = "") {
   image.title = host || url;
   image.onerror = () => {
     if (host) faviconSources.delete(host);
-    renderFallback(container, title, host, url);
+    if (!controller.signal.aborted) renderFallback(container, title, host, url);
   };
   image.src = source;
   container.replaceChildren(image);
