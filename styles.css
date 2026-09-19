@@ -408,7 +408,7 @@ html[data-ambient=false] .ambient{display:none}
 .content-panel{flex:1;min-height:0;overflow:auto;padding:11px 13px 18px}
 .bookmarks{
   --auto-columns:3;
-  --card-min-width:170px;
+  --card-min-width:240px;
   --card-height:58px;
   --favicon-size:32px;
   --title-size:13.5px;
@@ -798,12 +798,11 @@ html[data-ambient=false] .ambient{display:none}
 
 @media (min-width:1400px){
   .bookmarks[data-columns=auto]{
-    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-    grid-auto-flow:row;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   }
 }
 @media (max-width:1100px){
   .bookmarks{
-    --card-min-width:150px;
+    --card-min-width:210px;
   }
 }
