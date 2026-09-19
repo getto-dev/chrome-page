@@ -3,7 +3,11 @@
   "name": "Chrome Page",
   "version": "1.0.0",
   "description": "Fast bookmark workspace for the Chrome new tab.",
-  "permissions": ["bookmarks", "favicon", "storage"],
+  "permissions": [
+    "bookmarks",
+    "favicon",
+    "storage"
+  ],
   "background": {
     "service_worker": "worker.js",
     "type": "module"
@@ -17,6 +21,11 @@
     "48": "icons/icon48.png"
   },
   "action": {
-    "default_title": "Chrome Page"
+    "default_title": "Chrome Page",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
   }
 }
