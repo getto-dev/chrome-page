@@ -499,6 +499,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   color:var(--accent);
 }
 .folder-card .favicon .icon{width:32px;height:32px}
+.folder-card .folder-icon .icon{fill:currentColor;stroke:none}
 
 .empty-message{
   grid-column:1/-1;

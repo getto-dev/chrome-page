@@ -95,6 +95,14 @@ function renderBookmarks(force = false) {
   state.virtualStart = range.start; state.virtualEnd = range.end;
 }
 
+function getDisplayFolderTitle(folder) {
+  if (!folder) return "";
+  if (folder.id === state.bookmarksBarId) return "Главная";
+  if (folder.folderType === "other") return "Другие";
+  if (folder.folderType === "mobile") return "Мобильные";
+  return getTitle(folder);
+}
+
 function createBookmarkCard(bookmark) {
   const card = dom.bookmarkTemplate.content.cloneNode(true).querySelector(".card");
   const link = card.querySelector(".card-link"); const more = card.querySelector(".more");
@@ -113,7 +121,7 @@ function createBookmarkCard(bookmark) {
 function createFolderCard(folder) {
   const card = dom.folderTemplate.content.cloneNode(true).querySelector(".card");
   const button = card.querySelector(".folder-link"); const more = card.querySelector(".more");
-  const title = getTitle(folder);
+  const title = getDisplayFolderTitle(folder);
   card.dataset.folderId = folder.id; card.dataset.itemId = folder.id;
   button.querySelector(".card-title").textContent = title;
   more.setAttribute("aria-label", "Действия папки «" + title + "»");
@@ -126,7 +134,7 @@ function folderTrail(folderId) {
   while (current && !seen.has(current.id)) {
     seen.add(current.id);
     if (current.id !== state.rootId) {
-      result.push({ id: current.id, title: current.id === state.bookmarksBarId ? "Главная" : getTitle(current) });
+      result.push({ id: current.id, title: getDisplayFolderTitle(current) });
     }
     current = current.parentId ? state.map.get(current.parentId) : null;
   }
@@ -179,7 +187,6 @@ function renderSidebar() {
   const mobile = root?.children?.find(node => node.folderType === "mobile");
 
   addSpecial(bar, "Главная", "home");
-  addSpecial(other, "Другие закладки", "bookmark");
   addSpecial(mobile, "Мобильные", "mobile");
 
   const roots = bar?.children?.filter(node => !node.url) || [];
@@ -199,7 +206,15 @@ function renderSidebar() {
     more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
   }
   roots.forEach(addFolder);
-  if (!roots.length) { const empty = document.createElement("div"); empty.className = "folder-name"; empty.style.padding = "12px 10px"; empty.style.color = "var(--muted)"; empty.textContent = "Папок пока нет"; dom.folderTree.appendChild(empty); }
+  if (!roots.length) {
+    const empty = document.createElement("div");
+    empty.className = "folder-name";
+    empty.style.padding = "12px 10px";
+    empty.style.color = "var(--muted)";
+    empty.textContent = "Папок пока нет";
+    dom.folderTree.appendChild(empty);
+  }
+  addSpecial(other, "Другие", "bookmark");
 }
 
 function selectFolder(folderId) {
@@ -207,7 +222,7 @@ function selectFolder(folderId) {
   showSettings(false);
   state.currentFolderId = folderId; state.searchQuery = ""; dom.search.value = ""; dom.searchClear.classList.add("hidden");
   dom.bookmarkPanel.scrollTop = 0;
-  dom.folderTitle.textContent = folderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(folderId));
+  dom.folderTitle.textContent = getDisplayFolderTitle(state.map.get(folderId));
   state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
   renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
@@ -215,7 +230,7 @@ function selectFolder(folderId) {
 function showSearch(query) {
   state.searchQuery = query.trim(); dom.search.value = query; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
   dom.bookmarkPanel.scrollTop = 0;
-  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
+  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
   state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0; renderBreadcrumbs(); renderSidebar(); scheduleRender(true);
 }
 
@@ -226,7 +241,7 @@ function showSettings(show) {
     dom.folderTitle.textContent = "Настройки";
     dom.breadcrumbs.replaceChildren();
   } else {
-    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : (state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId)));
+    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
     renderBreadcrumbs();
     updateColumns();
     state.virtualStart = 0; state.virtualEnd = 0;
@@ -393,7 +408,7 @@ function removeFromMap(id) {
 function rerenderAfterDataChange() {
   if (state.currentFolderId && !state.map.has(state.currentFolderId)) state.currentFolderId = state.bookmarksBarId;
   renderSidebar(); state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
-  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId));
+  dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
   renderBreadcrumbs(); scheduleRender(true);
 }
 
@@ -424,7 +439,7 @@ async function refresh() {
     renderSidebar();
     state.searchQuery = previousSearch || ""; dom.search.value = state.searchQuery; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
     state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId });
-    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : state.currentFolderId === state.bookmarksBarId ? "Главная" : getTitle(state.map.get(state.currentFolderId));
+    dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
     renderBreadcrumbs(); updateColumns(); renderBookmarks(true);
   })().catch(error => {
     console.error(error); dom.bookmarks.replaceChildren(); const empty = document.createElement("div"); empty.className = "empty-message"; empty.textContent = "Не удалось загрузить закладки. Обновите вкладку."; dom.bookmarks.appendChild(empty);
