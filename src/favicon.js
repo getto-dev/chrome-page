@@ -79,7 +79,7 @@ function getMissingFaviconSignature() {
 function buildFaviconUrl(url) {
   const faviconUrl = new URL(chrome.runtime.getURL("_favicon/"));
   faviconUrl.searchParams.set("pageUrl", url);
-  faviconUrl.searchParams.set("size", "32");
+  faviconUrl.searchParams.set("size", String(FAVICON_REQUEST_SIZE));
   return faviconUrl.toString();
 }
 
