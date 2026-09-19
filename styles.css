@@ -15,8 +15,8 @@
   --accent-border:rgba(91,92,226,.26);
   --danger:#c83d32;
   --shadow:0 10px 35px rgba(26,31,44,.06),0 2px 7px rgba(26,31,44,.035);
-  --shadow-card:0 4px 18px rgba(26,31,44,.055),0 1px 2px rgba(26,31,44,.035);
-  --shadow-card-hover:0 16px 34px rgba(26,31,44,.11),0 4px 10px rgba(26,31,44,.045);
+  --shadow-card:0 1px 2px rgba(26,31,44,.025);
+  --shadow-card-hover:none;
   --blur:18px;
   --gap:14px;
   --radius:16px;
@@ -41,8 +41,8 @@ html[data-theme=dark]{
   --accent-border:rgba(141,136,255,.3);
   --danger:#f08479;
   --shadow:0 22px 60px rgba(0,0,0,.38),0 4px 14px rgba(0,0,0,.2);
-  --shadow-card:0 9px 26px rgba(0,0,0,.24),0 2px 5px rgba(0,0,0,.12);
-  --shadow-card-hover:0 20px 44px rgba(0,0,0,.38),0 5px 12px rgba(0,0,0,.16);
+  --shadow-card:0 1px 2px rgba(0,0,0,.10);
+  --shadow-card-hover:none;
 }
 @media (prefers-color-scheme:dark){
   html[data-theme=system]{
@@ -476,11 +476,11 @@ html[data-ambient=false] .ambient{display:none}
 .card-link{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
   width:100%;
   min-width:0;
   height:100%;
-  padding:10px 50px 10px 13px;
+  padding:7px 44px 7px 9px;
   border-radius:inherit;
   border:0;
   background:transparent;
@@ -523,9 +523,9 @@ html[data-ambient=false] .ambient{display:none}
   overflow-wrap:anywhere;
   word-break:break-word;
   font-size:var(--title-size);
-  line-height:1.28;
-  font-weight:660;
-  letter-spacing:-.018em;
+  line-height:1.25;
+  font-weight:620;
+  letter-spacing:-.012em;
 }
 .card-meta{
   min-width:0;
@@ -533,9 +533,9 @@ html[data-ambient=false] .ambient{display:none}
   text-overflow:ellipsis;
   white-space:nowrap;
   color:var(--muted);
-  font-size:10.5px;
+  font-size:10px;
   line-height:1.2;
-  letter-spacing:.002em;
+  letter-spacing:0;
 }
 .card-meta[hidden]{display:none}
 .bookmark-card .favicon{color:var(--accent)}
@@ -809,7 +809,7 @@ html[data-ambient=false] .ambient{display:none}
   .sidebar-footer .icon-button{width:34px;height:34px}
   .workspace{border-radius:16px}
   .workspace-header{align-items:flex-start;min-height:0;padding:15px}
-  .content-panel{padding:14px}
+  .content-panel{padding:12px 12px 16px}
   .setting-grid{grid-template-columns:1fr}
 }
 @media (hover:none),(pointer:coarse){
@@ -821,12 +821,12 @@ html[data-ambient=false] .ambient{display:none}
   .heading{width:100%;flex-basis:100%}
   .ghost-button{flex:none}
   .content-panel{padding:10px}
-  .bookmarks{gap:10px}
+  .bookmarks{gap:8px}
   .card .more{opacity:1}
   .settings-card{padding:17px;border-radius:16px}
   .settings-panel{padding:10px}
-  .card-link{gap:10px;padding:9px 48px 9px 11px}
-  .favicon{border-radius:11px}
+  .card-link{gap:9px;padding:6px 42px 6px 8px}
+  .favicon{border-radius:9px}
   .toggle-row,.range-row,.color-row{align-items:flex-start;flex-wrap:wrap}
   .range-row span,.color-row span{min-width:100%}
   .color-row input{margin-left:0}
