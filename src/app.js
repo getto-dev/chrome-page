@@ -109,8 +109,12 @@ function getDisplayFolderTitle(folder) {
 }
 
 function canModifyNode(node) {
-  if (!node || node.unmodifiable === "managed") return false;
-  return !["bookmarks-bar", "other", "managed"].includes(node.folderType);
+  if (!node || node.unmodifiable === "managed" || node.folderType) return false;
+  return true;
+}
+
+function canUseAsMoveDestination(node) {
+  return Boolean(node && !node.url && node.unmodifiable !== "managed");
 }
 
 function createBookmarkCard(bookmark) {
@@ -250,7 +254,7 @@ function renderSidebar() {
   const managed = root?.children?.filter(node => node.folderType === "managed") || [];
 
   addSpecial(bar, "Главная", "home");
-  mobiles.forEach(folder => addSpecial(folder, "Мобильные", "mobile", true));
+  mobiles.forEach(folder => addSpecial(folder, "Мобильные", "mobile", false));
 
   const roots = bar?.children?.filter(node => !node.url) || [];
 
