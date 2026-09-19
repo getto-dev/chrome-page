@@ -1,12 +1,31 @@
 import { createFallbackFavicon, isValidHttpUrl } from "./bookmarks-utils.js";
 
-export function attachFavicon(container, url, host) {
+function fallbackLetter(title, url) {
+  const source = String(title || "").trim();
+  return source.match(/[\p{L}\p{N}]/u)?.[0]?.toUpperCase() || createFallbackFavicon(url).slice(0, 1) || "?";
+}
+
+function fallbackHue(host, url) {
+  const source = String(host || url || "site");
+  let hash = 0;
+  for (const char of source) hash = (hash * 31 + char.codePointAt(0)) >>> 0;
+  return hash % 360;
+}
+
+function renderFallback(container, title, host, url) {
+  const fallback = document.createElement("span");
+  fallback.className = "favicon-fallback";
+  fallback.textContent = fallbackLetter(title, url);
+  fallback.style.setProperty("--favicon-fallback-hue", String(fallbackHue(host, url)));
+  fallback.setAttribute("aria-hidden", "true");
+  container.replaceChildren(fallback);
+}
+
+export function attachFavicon(container, url, host, title = "") {
   container.replaceChildren();
 
   if (!isValidHttpUrl(url)) {
-    const fallback = document.createElement("span");
-    fallback.textContent = createFallbackFavicon(url);
-    container.appendChild(fallback);
+    renderFallback(container, title, host, url);
     return;
   }
 
@@ -21,15 +40,11 @@ export function attachFavicon(container, url, host) {
     faviconUrl.searchParams.set("size", "32");
     image.src = faviconUrl.toString();
   } catch {
-    container.textContent = createFallbackFavicon(url);
+    renderFallback(container, title, host, url);
     return;
   }
 
-  image.onerror = () => {
-    const fallback = document.createElement("span");
-    fallback.textContent = createFallbackFavicon(url);
-    container.replaceChildren(fallback);
-  };
+  image.onerror = () => renderFallback(container, title, host, url);
   image.title = host || url;
   container.appendChild(image);
 }
