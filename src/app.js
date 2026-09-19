@@ -482,7 +482,7 @@ function openMenu(card, x, y, trigger = null) {
   const node = state.map.get(id);
   if (node.folderType) return;
   state.menuTargetId = id; state.menuTrigger = trigger; if (trigger) trigger.setAttribute("aria-expanded", "true");
-  const node = state.map.get(id); dom.menu.querySelector('[data-action="edit"]').classList.toggle("hidden", !node.url);
+  dom.menu.querySelector('[data-action="edit"]').classList.toggle("hidden", !node.url);
   dom.menu.classList.remove("hidden");
   requestAnimationFrame(() => dom.menu.querySelector("button:not(.hidden)")?.focus());
   const rect = dom.menu.getBoundingClientRect(); const margin = 8;
