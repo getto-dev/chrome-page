@@ -18,7 +18,6 @@ const ENUMS = {
 export function normalizeSettings(input) {
   const source = input && typeof input === "object" ? input : {};
   const rawColumns = source.columns === "auto" ? "auto" : Number(source.columns);
-
   return {
     theme: ENUMS.theme.has(source.theme) ? source.theme : DEFAULT_SETTINGS.theme,
     sortMode: ENUMS.sortMode.has(source.sortMode) ? source.sortMode : DEFAULT_SETTINGS.sortMode,
