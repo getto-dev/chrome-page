@@ -48,15 +48,14 @@ function applyVisualSettings() {
 }
 
 function calculateColumns() {
-  if (state.settings.columns !== "auto") {
-    return Math.max(1, Math.min(4, Number(state.settings.columns) || 3));
-  }
   const style = getComputedStyle(dom.bookmarks);
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(style.columnGap) || 18;
   const minWidth = parseFloat(style.getPropertyValue("--auto-min-width")) || 220;
   const maxColumns = Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
-  const requested = Number(state.settings.columns) || 3;
+
+  if (state.settings.columns === "auto") return maxColumns;
+  const requested = Math.max(1, Math.min(4, Number(state.settings.columns) || 3));
   return Math.min(requested, maxColumns);
 }
 
@@ -107,6 +106,11 @@ function renderBookmarks(force = false) {
 
 function getDisplayFolderTitle(folder) {
   return getFolderDisplayTitle(folder, state.bookmarksBarId);
+}
+
+function canModifyNode(node) {
+  if (!node || node.unmodifiable === "managed") return false;
+  return !["bookmarks-bar", "other", "managed"].includes(node.folderType);
 }
 
 function createBookmarkCard(bookmark) {
@@ -196,11 +200,12 @@ function renderSidebar() {
   dom.folderTree.replaceChildren();
   ensureCurrentFolderExpanded();
 
-  const addSpecial = (folder, label, icon = "folder") => {
+  const addSpecial = (folder, label, icon = "folder", allowActions = false) => {
     if (!folder) return;
     const row = document.createElement("div");
     row.className = "folder-row";
     row.dataset.folderId = folder.id;
+
     const spacer = document.createElement("span");
     spacer.className = "folder-toggle-spacer";
     row.appendChild(spacer);
@@ -222,16 +227,30 @@ function renderSidebar() {
     button.title = label;
     button.append(iconNode, name);
     row.appendChild(button);
+
+    if (allowActions && canModifyNode(folder)) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "more";
+      more.dataset.itemId = folder.id;
+      more.setAttribute("aria-haspopup", "menu");
+      more.setAttribute("aria-expanded", "false");
+      more.setAttribute("aria-label", "Действия папки «" + label + "»");
+      more.appendChild(createIcon("more"));
+      row.appendChild(more);
+    }
+
     dom.folderTree.appendChild(row);
   };
 
   const root = state.map.get(state.rootId);
   const bar = state.map.get(state.bookmarksBarId);
-  const other = root?.children?.find(node => node.folderType === "other");
-  const mobile = root?.children?.find(node => node.folderType === "mobile");
+  const others = root?.children?.filter(node => node.folderType === "other") || [];
+  const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
+  const managed = root?.children?.filter(node => node.folderType === "managed") || [];
 
   addSpecial(bar, "Главная", "home");
-  addSpecial(mobile, "Мобильные", "mobile");
+  mobiles.forEach(folder => addSpecial(folder, "Мобильные", "mobile", true));
 
   const roots = bar?.children?.filter(node => !node.url) || [];
 
@@ -282,14 +301,12 @@ function renderSidebar() {
     more.dataset.itemId = folder.id;
     more.setAttribute("aria-haspopup", "menu");
     more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»");
+    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»");
     more.appendChild(createIcon("more"));
     row.appendChild(more);
     dom.folderTree.appendChild(row);
 
-    if (!state.collapsedFolders.has(folder.id)) {
-      children.forEach(addFolder);
-    }
+    if (!state.collapsedFolders.has(folder.id)) children.forEach(addFolder);
   }
 
   roots.forEach(addFolder);
@@ -301,7 +318,9 @@ function renderSidebar() {
     empty.textContent = "Папок пока нет";
     dom.folderTree.appendChild(empty);
   }
-  addSpecial(other, "Другие", "bookmark");
+
+  managed.forEach(folder => addSpecial(folder, getFolderDisplayTitle(folder), "folder", false));
+  others.forEach(folder => addSpecial(folder, "Другие", "bookmark", false));
 }
 
 function clearSearchTimer() {
@@ -413,7 +432,7 @@ function getMoveFolders(sourceId) {
   const source = state.map.get(sourceId); const q = dom.moveSearch.value.trim().toLocaleLowerCase();
   return [...state.map.values()]
     .filter(node => !node.url && node.parentId)
-    .filter(folder => source && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
+    .filter(folder => source && canModifyNode(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
     .filter(folder => { const path = getFolderPath(state.map, folder.id, state.bookmarksBarId).toLocaleLowerCase(); return !q || getTitle(folder).toLocaleLowerCase().includes(q) || path.includes(q); })
     .sort((a, b) => getFolderPath(state.map, a.id, state.bookmarksBarId).localeCompare(getFolderPath(state.map, b.id, state.bookmarksBarId), undefined, { sensitivity: "base", numeric: true }));
 }
@@ -457,8 +476,8 @@ async function executeAction(action) {
   const id = state.menuTargetId;
   const node = state.map.get(id);
   state.dialogReturnFocus = state.menuTrigger?.isConnected ? state.menuTrigger : null;
-  closeMenu();
-  if (!node) return;
+  closeMenu(false);
+  if (!node || !canModifyNode(node)) return;
   try {
     if (action === "rename") {
       const value = await openInputDialog({ title: "Переименовать", label: "Название", value: getTitle(node), validate: v => v.trim() ? "" : "Название не может быть пустым." });
@@ -490,13 +509,13 @@ function openMenu(card, x, y, trigger = null) {
   dom.menu.style.top = String(Math.max(margin, Math.min(Number(y) || margin, innerHeight - rect.height - margin))) + "px";
 }
 
-function closeMenu() {
+function closeMenu(restoreFocus = true) {
   const trigger = state.menuTrigger;
   dom.menu.classList.add("hidden");
   trigger?.setAttribute("aria-expanded", "false");
   state.menuTargetId = null;
   state.menuTrigger = null;
-  if (trigger?.isConnected) requestAnimationFrame(() => trigger.focus());
+  if (restoreFocus && trigger?.isConnected) requestAnimationFrame(() => trigger.focus());
 }
 
 function addToParent(parentId, node, index = Infinity) {
@@ -624,7 +643,7 @@ function setupEvents() {
   dom.menu.addEventListener("click", event => { const action = event.target.closest("[data-action]")?.dataset.action; if (action) void executeAction(action); });
 
   document.addEventListener("click", event => {
-    if (!event.target.closest("#menu") && !event.target.closest(".more")) closeMenu();
+    if (!event.target.closest("#menu") && !event.target.closest(".more")) closeMenu(false);
     const button = event.target.closest("[data-setting] button");
     if (button) { const key = button.closest("[data-setting]")?.dataset.setting; let value = button.dataset.value; if (key === "columns" && value !== "auto") value = Number(value); if (key) { state.settings[key] = value; void persistSettings(); } }
   });
@@ -659,7 +678,9 @@ function setupEvents() {
   dom.moveList.addEventListener("click", e => { const button = e.target.closest("[data-folder-id]"); if (button) { state.moveDestinationId = button.dataset.folderId; renderMoveFolders(); } });
   dom.moveSubmit.addEventListener("click", async () => { if (!state.moveSourceId || !state.moveDestinationId) return; try { await chrome.bookmarks.move(state.moveSourceId, { parentId: state.moveDestinationId }); closeMoveDialog(); } catch (error) { console.error("Move failed:", error); } });
   document.addEventListener("keydown", event => {
-    if (!dom.menu.classList.contains("hidden")) { if (event.key === "Escape") { event.preventDefault(); closeMenu(); return; }
+    if (!dom.menu.classList.contains("hidden")) {
+      if (event.key === "Escape") { event.preventDefault(); closeMenu(); return; }
+      if (event.key === "Tab") { closeMenu(false); return; }
       const items = [...dom.menu.querySelectorAll("button:not(.hidden)")]; const index = items.indexOf(document.activeElement);
       if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); const next = event.key === "ArrowDown" ? 1 : -1; items[(index + next + items.length) % items.length]?.focus(); return; } }
     if (!dom.dialog.classList.contains("hidden")) {
