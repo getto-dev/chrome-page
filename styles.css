@@ -595,18 +595,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   border-color:var(--accent-border);
   color:var(--active-text);
 }
-.toggle-row,.range-row,.color-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  padding:10px 11px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:rgba(var(--surface),.22);
-  margin-top:6px;
-  font-size:12px;
-}
 .toggle-row>span{display:flex;flex-direction:column;gap:3px;min-width:0}
 .toggle-row strong{font-weight:620}
 .toggle-row small{color:var(--muted);font-size:10px}
