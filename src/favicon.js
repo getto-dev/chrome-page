@@ -130,8 +130,6 @@ export async function attachFavicon(container, url, host, title = "") {
   }
 
   const source = await loadFaviconSource(host, url);
-  if (!container.isConnected) return;
-
   if (!source) {
     renderFallback(container, title, host, url);
     return;
