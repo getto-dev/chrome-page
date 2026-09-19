@@ -314,10 +314,10 @@ function renderSidebar() {
   const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
   const managed = root?.children?.filter(node => node.folderType === "managed") || [];
 
-  visibleBars.forEach((folder, index) => {
-    const label = index === 0 ? "Главная" : folder.syncing ? "Главная (аккаунт)" : "Главная (локальная)";
+  visibleBars.forEach(folder => {
+    const label = folder.id === state.bookmarksBarId ? "Главная" : folder.syncing ? "Главная (аккаунт)" : "Главная (локальная)";
     addSpecial(folder, label, "home");
-    (folder.children?.filter(node => !node.url) || []).forEach(addFolder);
+    (folder.children?.filter(node => !node.url) || []).forEach(child => addFolder(child));
     if (folder.id === state.bookmarksBarId && !(folder.children || []).some(node => !node.url)) {
       const empty = document.createElement("div");
       empty.className = "folder-name";
