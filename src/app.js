@@ -515,26 +515,61 @@ function removeFromMap(id) {
   const node = state.map.get(id); if (!node) return; for (const child of node.children || []) removeFromMap(child.id); state.map.delete(id);
 }
 
-function rerenderAfterDataChange() {
+function rerenderAfterDataChange({ sidebar = false } = {}) {
   if (state.currentFolderId && !state.map.has(state.currentFolderId)) state.currentFolderId = state.bookmarksBarId;
-  renderSidebar(); state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId }); state.virtualStart = 0; state.virtualEnd = 0;
+  if (sidebar) renderSidebar();
+  state.children = getCurrentChildren({ map: state.map, currentFolderId: state.currentFolderId, searchQuery: state.searchQuery, sortMode: state.settings.sortMode, bookmarksBarId: state.bookmarksBarId });
+  state.virtualStart = 0;
+  state.virtualEnd = 0;
   dom.folderTitle.textContent = state.searchQuery ? "Поиск" : getDisplayFolderTitle(state.map.get(state.currentFolderId));
-  renderBreadcrumbs(); scheduleRender(true);
+  renderBreadcrumbs();
+  scheduleRender(true);
 }
 
 function applyBookmarkEvent(message) {
   const { type, data } = message || {};
   if (type === "BOOKMARKS_REFRESH") { scheduleRefresh(); return; }
   if (!data) return;
-  if (type === "BOOKMARK_CREATED") { state.map.set(data.id, data.node); addToParent(data.node.parentId, data.node, data.node.index); }
-  if (type === "BOOKMARK_CHANGED") { const node = state.map.get(data.id); if (node) Object.assign(node, data.changes); }
-  if (type === "BOOKMARK_REMOVED") { const node = state.map.get(data.id); if (node) { removeFromParent(node); removeFromMap(data.id); } }
-  if (type === "BOOKMARK_MOVED") { const node = state.map.get(data.id); if (node) { removeFromParent(node); addToParent(data.moveInfo?.parentId, node, data.moveInfo?.index); } }
+
+  let sidebar = false;
+  if (type === "BOOKMARK_CREATED") {
+    state.map.set(data.id, data.node);
+    addToParent(data.node.parentId, data.node, data.node.index);
+    sidebar = !data.node.url;
+  }
+  if (type === "BOOKMARK_CHANGED") {
+    const node = state.map.get(data.id);
+    if (node) {
+      Object.assign(node, data.changes);
+      sidebar = !node.url && Object.prototype.hasOwnProperty.call(data.changes || {}, "title");
+    }
+  }
+  if (type === "BOOKMARK_REMOVED") {
+    const node = state.map.get(data.id);
+    if (node) {
+      sidebar = !node.url;
+      removeFromParent(node);
+      removeFromMap(data.id);
+    }
+  }
+  if (type === "BOOKMARK_MOVED") {
+    const node = state.map.get(data.id);
+    if (node) {
+      sidebar = !node.url;
+      removeFromParent(node);
+      addToParent(data.moveInfo?.parentId, node, data.moveInfo?.index);
+    }
+  }
   if (type === "BOOKMARKS_REORDERED") {
     const folder = state.map.get(data.folderId);
-    if (folder?.children && Array.isArray(data.childIds)) { const byId = new Map(folder.children.map(child => [child.id, child])); folder.children = data.childIds.map(id => byId.get(id)).filter(Boolean); folder.children.forEach((child, i) => { child.index = i; child.parentId = folder.id; }); }
+    if (folder?.children && Array.isArray(data.childIds)) {
+      const byId = new Map(folder.children.map(child => [child.id, child]));
+      folder.children = data.childIds.map(id => byId.get(id)).filter(Boolean);
+      folder.children.forEach((child, i) => { child.index = i; child.parentId = folder.id; });
+      sidebar = !folder.url && isDescendantOrSelf(state.map, folder.id, state.bookmarksBarId);
+    }
   }
-  rerenderAfterDataChange();
+  rerenderAfterDataChange({ sidebar });
 }
 
 async function refresh() {
