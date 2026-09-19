@@ -51,7 +51,7 @@ function calculateColumns() {
   const style = getComputedStyle(dom.bookmarks);
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(style.columnGap) || 18;
-  const minWidth = parseFloat(style.getPropertyValue("--auto-min-width")) || 220;
+  const minWidth = parseFloat(style.getPropertyValue("--auto-column-threshold")) || 220;
   const maxColumns = Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
 
   if (state.settings.columns === "auto") return maxColumns;
@@ -247,18 +247,7 @@ function renderSidebar() {
     dom.folderTree.appendChild(row);
   };
 
-  const root = state.map.get(state.rootId);
-  const bar = state.map.get(state.bookmarksBarId);
-  const others = root?.children?.filter(node => node.folderType === "other") || [];
-  const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
-  const managed = root?.children?.filter(node => node.folderType === "managed") || [];
-
-  addSpecial(bar, "Главная", "home");
-  mobiles.forEach(folder => addSpecial(folder, "Мобильные", "mobile", false));
-
-  const roots = bar?.children?.filter(node => !node.url) || [];
-
-  function addFolder(folder) {
+  function addFolder(folder, allowActions = true) {
     const row = document.createElement("div");
     row.className = "folder-row";
     row.dataset.folderId = folder.id;
@@ -299,34 +288,61 @@ function renderSidebar() {
     button.append(icon, name);
     row.appendChild(button);
 
-    const more = document.createElement("button");
-    more.type = "button";
-    more.className = "more";
-    more.dataset.itemId = folder.id;
-    more.setAttribute("aria-haspopup", "menu");
-    more.setAttribute("aria-expanded", "false");
-    more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»");
-    more.appendChild(createIcon("more"));
-    row.appendChild(more);
+    if (allowActions && canModifyNode(folder)) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "more";
+      more.dataset.itemId = folder.id;
+      more.setAttribute("aria-haspopup", "menu");
+      more.setAttribute("aria-expanded", "false");
+      more.setAttribute("aria-label", "Действия папки «" + getTitle(folder) + "»");
+      more.appendChild(createIcon("more"));
+      row.appendChild(more);
+    }
     dom.folderTree.appendChild(row);
 
-    if (!state.collapsedFolders.has(folder.id)) children.forEach(addFolder);
+    if (!state.collapsedFolders.has(folder.id)) {
+      children.forEach(child => addFolder(child, allowActions));
+    }
   }
 
-  roots.forEach(addFolder);
-  if (!roots.length) {
-    const empty = document.createElement("div");
-    empty.className = "folder-name";
-    empty.style.padding = "12px 10px";
-    empty.style.color = "var(--muted)";
-    empty.textContent = "Папок пока нет";
-    dom.folderTree.appendChild(empty);
-  }
+  const root = state.map.get(state.rootId);
+  const bar = state.map.get(state.bookmarksBarId);
+  const bars = root?.children?.filter(node => node.folderType === "bookmarks-bar") || [];
+  const visibleBars = bars.length ? bars : (bar ? [bar] : []);
+  const others = root?.children?.filter(node => node.folderType === "other") || [];
+  const mobiles = root?.children?.filter(node => node.folderType === "mobile") || [];
+  const managed = root?.children?.filter(node => node.folderType === "managed") || [];
 
-  managed.forEach(folder => addSpecial(folder, getFolderDisplayTitle(folder), "folder", false));
-  others.forEach(folder => addSpecial(folder, "Другие", "bookmark", false));
+  visibleBars.forEach(folder => {
+    const label = folder.id === state.bookmarksBarId ? "Главная" : folder.syncing ? "Главная (аккаунт)" : "Главная (локальная)";
+    addSpecial(folder, label, "home");
+    (folder.children?.filter(node => !node.url) || []).forEach(child => addFolder(child));
+    if (folder.id === state.bookmarksBarId && !(folder.children || []).some(node => !node.url)) {
+      const empty = document.createElement("div");
+      empty.className = "folder-name";
+      empty.style.padding = "12px 10px";
+      empty.style.color = "var(--muted)";
+      empty.textContent = "Папок пока нет";
+      dom.folderTree.appendChild(empty);
+    }
+  });
+
+  mobiles.forEach((folder, index) => {
+    const label = mobiles.length > 1 ? "Мобильные (" + (folder.syncing ? "аккаунт" : "локальные") + ")" : "Мобильные";
+    addSpecial(folder, label, "mobile", false);
+  });
+
+  managed.forEach(folder => {
+    addSpecial(folder, getFolderDisplayTitle(folder), "folder", false);
+    (folder.children?.filter(node => !node.url) || []).forEach(child => addFolder(child, false));
+  });
+
+  others.forEach((folder, index) => {
+    const label = others.length > 1 ? "Другие (" + (folder.syncing ? "аккаунт" : "локальные") + ")" : "Другие";
+    addSpecial(folder, label, "bookmark", false);
+  });
 }
-
 function clearSearchTimer() {
   clearTimeout(state.searchTimer);
   state.searchTimer = 0;
@@ -445,7 +461,7 @@ function getMoveFolders(sourceId) {
 
   return [...state.map.values()]
     .filter(node => !node.url && node.parentId)
-    .filter(folder => canModifyNode(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
+    .filter(folder => canUseAsMoveDestination(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
     .map(folder => ({ folder, title: getTitle(folder).toLocaleLowerCase(), path: getPath(folder) }))
     .filter(entry => !q || entry.title.includes(q) || entry.path.toLocaleLowerCase().includes(q))
     .sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: "base", numeric: true }))
@@ -618,6 +634,7 @@ async function refresh() {
     if (!response?.success) throw new Error(response?.error || "Не удалось загрузить закладки");
     const previousFolder = state.currentFolderId; const previousSearch = state.searchQuery;
     state.map = buildMap(response.data.tree[0]); state.rootId = response.data.tree[0].id; state.bookmarksBarId = response.data.bookmarksBarId;
+    for (const id of state.collapsedFolders) if (!state.map.has(id)) state.collapsedFolders.delete(id);
     state.currentFolderId = previousFolder && state.map.has(previousFolder) ? previousFolder : state.bookmarksBarId;
     renderSidebar();
     state.searchQuery = previousSearch || ""; dom.search.value = state.searchQuery; dom.searchClear.classList.toggle("hidden", !state.searchQuery);

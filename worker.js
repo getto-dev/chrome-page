@@ -30,8 +30,10 @@ async function loadTree() {
         }
 
         const root = tree[0];
+        const bookmarkBars = root.children?.filter(node => node.folderType === "bookmarks-bar") || [];
         const bookmarksBar =
-          root.children?.find(node => node.folderType === "bookmarks-bar") ??
+          bookmarkBars.find(node => node.syncing) ??
+          bookmarkBars[0] ??
           root.children?.[0] ??
           null;
 

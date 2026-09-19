@@ -85,11 +85,35 @@ function buildFaviconUrl(url) {
   return faviconUrl.toString();
 }
 
-function loadFaviconSource(host, url) {
-  if (host && faviconSources.has(host)) return Promise.resolve(faviconSources.get(host));
-  if (host && faviconSourcePromises.has(host)) return faviconSourcePromises.get(host);
+function getCachedFaviconSource(host) {
+  if (!host || !faviconSources.has(host)) return "";
+  const source = faviconSources.get(host);
+  faviconSources.delete(host);
+  faviconSources.set(host, source);
+  return source;
+}
 
-  const promise = new Promise(resolve => {
+function setCachedFaviconSource(host, source) {
+  if (!host || !source) return;
+  faviconSources.delete(host);
+  faviconSources.set(host, source);
+  if (faviconSources.size > MAX_FAVICON_CACHE) {
+    faviconSources.delete(faviconSources.keys().next().value);
+  }
+}
+
+function getFaviconPageUrls(url) {
+  const candidates = [];
+  try {
+    const page = new URL(url);
+    if (page.origin && page.origin !== "null") candidates.push(page.origin + "/");
+  } catch {}
+  candidates.push(url);
+  return [...new Set(candidates)];
+}
+
+function loadFaviconCandidate(pageUrl) {
+  return new Promise(resolve => {
     const image = new Image();
     image.onload = async () => {
       const width = image.naturalWidth;
@@ -105,23 +129,33 @@ function loadFaviconSource(host, url) {
         return;
       }
 
-      const source = image.src;
-      if (host) {
-        faviconSources.set(host, source);
-        if (faviconSources.size > MAX_FAVICON_CACHE) {
-          faviconSources.delete(faviconSources.keys().next().value);
-        }
-      }
-      resolve(source);
+      resolve(image.src);
     };
     image.onerror = () => resolve("");
 
     try {
-      image.src = buildFaviconUrl(url);
+      image.src = buildFaviconUrl(pageUrl);
     } catch {
       resolve("");
     }
-  }).finally(() => {
+  });
+}
+
+function loadFaviconSource(host, url) {
+  const cached = getCachedFaviconSource(host);
+  if (cached) return Promise.resolve(cached);
+  if (host && faviconSourcePromises.has(host)) return faviconSourcePromises.get(host);
+
+  const promise = (async () => {
+    for (const pageUrl of getFaviconPageUrls(url)) {
+      const source = await loadFaviconCandidate(pageUrl);
+      if (source) {
+        setCachedFaviconSource(host, source);
+        return source;
+      }
+    }
+    return "";
+  })().finally(() => {
     if (host) faviconSourcePromises.delete(host);
   });
 
