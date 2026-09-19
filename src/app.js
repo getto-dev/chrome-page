@@ -115,7 +115,7 @@ function createBookmarkCard(bookmark) {
   link.title = title;
   link.setAttribute("aria-label", title);
   more.setAttribute("aria-label", "Действия закладки «" + title + "»");
-  attachFavicon(link.querySelector(".favicon"), url, host); return card;
+  attachFavicon(link.querySelector(".favicon"), url, host, title); return card;
 }
 
 function createFolderCard(folder) {
