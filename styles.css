@@ -419,10 +419,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 .bookmarks[data-size=compact]{--card-min-width:180px;--card-height:52px;--favicon-size:29px;--title-size:12.5px}
 .bookmarks[data-size=standard]{--card-min-width:200px;--card-height:58px;--favicon-size:32px;--title-size:13.5px}
 .bookmarks[data-size=large]{--card-min-width:260px;--card-height:68px;--favicon-size:36px;--title-size:14px}
-.bookmarks[data-radius=sharp]{--radius:6px}
-.bookmarks[data-radius=soft]{--radius:8px}
-.bookmarks[data-radius=round]{--radius:10px}
-
 .card{
   position:relative;
   height:var(--card-height);
