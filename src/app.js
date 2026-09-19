@@ -4,7 +4,7 @@ import { createIcon } from "./icons.js";
 import { attachFavicon } from "./favicon.js";
 import { getCurrentChildren } from "./search.js";
 
-const CARD_HEIGHT = { compact: 56, standard: 64, large: 80 };
+const CARD_HEIGHT = { compact: 52, standard: 58, large: 68 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
