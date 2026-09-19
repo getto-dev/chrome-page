@@ -51,7 +51,7 @@ function calculateColumns() {
   const style = getComputedStyle(dom.bookmarks);
   const width = Math.max(0, dom.bookmarks.clientWidth);
   const gap = parseFloat(style.columnGap) || 18;
-  const minWidth = parseFloat(style.getPropertyValue("--auto-min-width")) || 220;
+  const minWidth = parseFloat(style.getPropertyValue("--auto-column-threshold")) || 220;
   const maxColumns = Math.max(1, Math.floor((width + gap) / (minWidth + gap)));
 
   if (state.settings.columns === "auto") return maxColumns;
@@ -445,7 +445,7 @@ function getMoveFolders(sourceId) {
 
   return [...state.map.values()]
     .filter(node => !node.url && node.parentId)
-    .filter(folder => canModifyNode(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
+    .filter(folder => canUseAsMoveDestination(folder) && folder.id !== source.id && folder.id !== source.parentId && (source.url || !isDescendantOrSelf(state.map, folder.id, source.id)))
     .map(folder => ({ folder, title: getTitle(folder).toLocaleLowerCase(), path: getPath(folder) }))
     .filter(entry => !q || entry.title.includes(q) || entry.path.toLocaleLowerCase().includes(q))
     .sort((a, b) => a.path.localeCompare(b.path, undefined, { sensitivity: "base", numeric: true }))
@@ -618,6 +618,7 @@ async function refresh() {
     if (!response?.success) throw new Error(response?.error || "Не удалось загрузить закладки");
     const previousFolder = state.currentFolderId; const previousSearch = state.searchQuery;
     state.map = buildMap(response.data.tree[0]); state.rootId = response.data.tree[0].id; state.bookmarksBarId = response.data.bookmarksBarId;
+    for (const id of state.collapsedFolders) if (!state.map.has(id)) state.collapsedFolders.delete(id);
     state.currentFolderId = previousFolder && state.map.has(previousFolder) ? previousFolder : state.bookmarksBarId;
     renderSidebar();
     state.searchQuery = previousSearch || ""; dom.search.value = state.searchQuery; dom.searchClear.classList.toggle("hidden", !state.searchQuery);
