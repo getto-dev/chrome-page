@@ -126,17 +126,12 @@ function renderBookmarks(force = false) {
 function createBookmarkCard(bookmark) {
   const card = dom.bookmarkTemplate.content.cloneNode(true).querySelector(".card");
   const link = card.querySelector(".card-link"); const more = card.querySelector(".more");
-  const meta = link.querySelector(".card-meta");
   const title = getTitle(bookmark); const url = typeof bookmark.url === "string" ? bookmark.url.trim() : "";
   const host = getHostname(url);
   card.dataset.bookmarkId = bookmark.id; card.dataset.itemId = bookmark.id;
   link.href = isValidHttpUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
   if (state.settings.openInNewTab) link.rel = "noopener noreferrer";
   link.querySelector(".card-title").textContent = title;
-  meta.textContent = state.searchQuery
-    ? getFolderPath(state.map, bookmark.parentId, state.bookmarksBarId)
-    : host;
-  meta.hidden = !meta.textContent;
   more.setAttribute("aria-label", "Действия закладки «" + title + "»");
   attachFavicon(link.querySelector(".favicon"), url, host); return card;
 }
