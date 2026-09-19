@@ -4,7 +4,8 @@ const MIN_FAVICON_SIZE = 24;
 const FAVICON_REQUEST_SIZE = 64;
 const faviconSources = new Map();
 const faviconSourcePromises = new Map();
-const faviconControllers = new WeakMap();
+const faviconRequestTokens = new WeakMap();
+const MAX_FAVICON_CACHE = 512;
 let missingFaviconSignaturePromise = null;
 
 function fallbackLetter(title, url) {
@@ -105,7 +106,12 @@ function loadFaviconSource(host, url) {
       }
 
       const source = image.src;
-      if (host) faviconSources.set(host, source);
+      if (host) {
+        faviconSources.set(host, source);
+        if (faviconSources.size > MAX_FAVICON_CACHE) {
+          faviconSources.delete(faviconSources.keys().next().value);
+        }
+      }
       resolve(source);
     };
     image.onerror = () => resolve("");
@@ -124,9 +130,10 @@ function loadFaviconSource(host, url) {
 }
 
 export async function attachFavicon(container, url, host, title = "") {
-  faviconControllers.get(container)?.abort();
-  const controller = new AbortController();
-  faviconControllers.set(container, controller);
+  const previousRequest = faviconRequestTokens.get(container);
+  if (previousRequest) previousRequest.canceled = true;
+  const request = { canceled: false };
+  faviconRequestTokens.set(container, request);
   container.replaceChildren();
 
   if (!isValidHttpUrl(url)) {
@@ -135,7 +142,7 @@ export async function attachFavicon(container, url, host, title = "") {
   }
 
   const source = await loadFaviconSource(host, url);
-  if (controller.signal.aborted) return;
+  if (request.canceled || faviconRequestTokens.get(container) !== request) return;
   if (!source) {
     renderFallback(container, title, host, url);
     return;
@@ -148,7 +155,7 @@ export async function attachFavicon(container, url, host, title = "") {
   image.title = host || url;
   image.onerror = () => {
     if (host) faviconSources.delete(host);
-    if (!controller.signal.aborted) renderFallback(container, title, host, url);
+    if (!request.canceled && faviconRequestTokens.get(container) === request) renderFallback(container, title, host, url);
   };
   image.src = source;
   container.replaceChildren(image);
