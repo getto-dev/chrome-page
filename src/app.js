@@ -208,6 +208,9 @@ function renderSidebar() {
     button.append(icon, name); row.appendChild(button);
     const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
+    for (const child of folder.children || []) {
+      if (!child.url) addFolder(child);
+    }
   }
   roots.forEach(addFolder);
   if (!roots.length) {
