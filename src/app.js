@@ -4,7 +4,7 @@ import { createIcon } from "./icons.js";
 import { attachFavicon } from "./favicon.js";
 import { getCurrentChildren } from "./search.js";
 
-const CARD_HEIGHT = { compact: 56, standard: 64, large: 80 };
+const CARD_HEIGHT = { compact: 52, standard: 58, large: 68 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
@@ -132,6 +132,8 @@ function createBookmarkCard(bookmark) {
   link.href = isValidHttpUrl(url) ? url : "#"; link.target = state.settings.openInNewTab ? "_blank" : "_self";
   if (state.settings.openInNewTab) link.rel = "noopener noreferrer";
   link.querySelector(".card-title").textContent = title;
+  link.title = title;
+  link.setAttribute("aria-label", title);
   more.setAttribute("aria-label", "Действия закладки «" + title + "»");
   attachFavicon(link.querySelector(".favicon"), url, host); return card;
 }

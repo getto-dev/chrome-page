@@ -18,8 +18,8 @@
   --shadow-card:0 1px 2px rgba(26,31,44,.025);
   --shadow-card-hover:none;
   --blur:18px;
-  --gap:14px;
-  --radius:16px;
+  --gap:9px;
+  --radius:10px;
   --transition:.2s cubic-bezier(.2,.65,.25,1);
   --font-sans:Inter, "SF Pro Display", "SF Pro Text", Geist, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --glass-highlight:rgba(255,255,255,.055);
@@ -409,24 +409,24 @@ html[data-ambient=false] .ambient{display:none}
 .bookmarks{
   --auto-columns:3;
   --card-min-width:200px;
-  --card-height:60px;
+  --card-height:58px;
   --favicon-size:32px;
-  --title-size:13px;
+  --title-size:13.5px;
   display:grid;
   grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));
   gap:var(--gap);
   align-content:start;
   contain:layout;
 }
-.bookmarks[data-spacing=compact]{--gap:7px}
+.bookmarks[data-spacing=compact]{--gap:6px}
 .bookmarks[data-spacing=standard]{--gap:9px}
 .bookmarks[data-spacing=large]{--gap:12px}
-.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:52px;--favicon-size:30px;--title-size:12.5px}
-.bookmarks[data-size=standard]{--card-min-width:200px;--card-height:60px;--favicon-size:32px;--title-size:13px}
-.bookmarks[data-size=large]{--card-min-width:260px;--card-height:76px;--favicon-size:40px;--title-size:14px}
-.bookmarks[data-radius=sharp]{--radius:7px}
-.bookmarks[data-radius=soft]{--radius:9px}
-.bookmarks[data-radius=round]{--radius:12px}
+.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:52px;--favicon-size:29px;--title-size:12.5px}
+.bookmarks[data-size=standard]{--card-min-width:200px;--card-height:58px;--favicon-size:32px;--title-size:13.5px}
+.bookmarks[data-size=large]{--card-min-width:260px;--card-height:68px;--favicon-size:36px;--title-size:14px}
+.bookmarks[data-radius=sharp]{--radius:6px}
+.bookmarks[data-radius=soft]{--radius:8px}
+.bookmarks[data-radius=round]{--radius:10px}
 
 .card{
   position:relative;
@@ -435,17 +435,17 @@ html[data-ambient=false] .ambient{display:none}
   overflow:hidden;
   border:1px solid var(--border);
   border-radius:var(--radius);
-  background:rgba(var(--surface),.22);
+  background:rgba(var(--surface),.18);
   box-shadow:none;
   transition:background var(--transition),border-color var(--transition);
 }
 .card:hover{
-  background:rgba(var(--surface),.44);
+  background:rgba(var(--surface),.36);
   border-color:var(--border-strong);
 }
 .card:focus-within{
   border-color:var(--accent-border);
-  box-shadow:0 0 0 3px var(--accent-soft);
+  box-shadow:0 0 0 2px var(--accent-soft);
 }
 .card-link{
   display:flex;
@@ -454,7 +454,7 @@ html[data-ambient=false] .ambient{display:none}
   width:100%;
   min-width:0;
   height:100%;
-  padding:6px 42px 6px 9px;
+  padding:5px 40px 5px 9px;
   border-radius:inherit;
   border:0;
   background:transparent;
@@ -471,7 +471,7 @@ html[data-ambient=false] .ambient{display:none}
   height:var(--favicon-size);
   border:1px solid var(--border);
   border-radius:9px;
-  background:rgba(var(--surface),.72);
+  background:rgba(var(--surface),.7);
   overflow:hidden;
   font-size:10px;
   font-weight:750;
@@ -482,35 +482,24 @@ html[data-ambient=false] .ambient{display:none}
 .favicon img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .card-text{
   display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:2px;
+  align-items:center;
   min-width:0;
   flex:1;
 }
 .card-title{
+  display:block;
   min-width:0;
-  overflow:hidden;
-  display:-webkit-box;
-  -webkit-box-orient:vertical;
-  -webkit-line-clamp:2;
-  overflow-wrap:anywhere;
-  word-break:break-word;
-  font-size:var(--title-size);
-  line-height:1.22;
-  font-weight:620;
-  letter-spacing:-.01em;
-}
-.card-meta{
-  min-width:0;
+  width:100%;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  color:var(--muted);
-  font-size:9.5px;
+  overflow-wrap:normal;
+  word-break:normal;
+  font-size:var(--title-size);
   line-height:1.2;
+  font-weight:620;
+  letter-spacing:-.01em;
 }
-.card-meta[hidden]{display:none}
 .bookmark-card .favicon{color:var(--accent)}
 .folder-card .favicon{
   background:var(--accent-soft);
@@ -526,8 +515,8 @@ html[data-ambient=false] .ambient{display:none}
   min-height:180px;
   padding:28px;
   border:1px dashed var(--border-strong);
-  border-radius:12px;
-  background:rgba(var(--surface),.16);
+  border-radius:10px;
+  background:rgba(var(--surface),.14);
   color:var(--muted);
   font-size:12px;
   text-align:center;
@@ -776,7 +765,7 @@ html[data-ambient=false] .ambient{display:none}
   .sidebar-footer .icon-button{width:34px;height:34px}
   .workspace{border-radius:13px}
   .workspace-header{align-items:flex-start;min-height:0;padding:12px 13px 10px}
-  .content-panel{padding:12px 12px 16px}
+  .content-panel{padding:10px 10px 14px}
   .setting-grid{grid-template-columns:1fr}
 }
 @media (hover:none),(pointer:coarse){
@@ -787,11 +776,11 @@ html[data-ambient=false] .ambient{display:none}
   .workspace-header{flex-wrap:wrap;gap:10px}
   .heading{width:100%;flex-basis:100%}
   .content-panel{padding:10px}
-  .bookmarks{gap:8px}
+  .bookmarks{gap:7px}
   .card .more{opacity:1}
   .settings-card{padding:16px;border-radius:13px}
   .settings-panel{padding:9px}
-  .card-link{gap:9px;padding:6px 42px 6px 8px}
+  .card-link{gap:8px;padding:5px 40px 5px 8px}
   .favicon{border-radius:9px}
   .toggle-row,.range-row,.color-row{align-items:flex-start;flex-wrap:wrap}
   .range-row span,.color-row span{min-width:100%}
