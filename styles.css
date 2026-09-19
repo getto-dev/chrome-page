@@ -61,9 +61,9 @@ html[data-theme=dark]{
     --accent-soft:rgba(141,136,255,.13);
     --accent-border:rgba(141,136,255,.3);
     --danger:#f08479;
-    --shadow:0 22px 60px rgba(0,0,0,.38),0 4px 14px rgba(0,0,0,.2);
-    --shadow-card:0 8px 24px rgba(0,0,0,.22);
-    --shadow-card-hover:0 18px 40px rgba(0,0,0,.34);
+    --shadow:0 18px 48px rgba(0,0,0,.28),0 1px 2px rgba(0,0,0,.14);
+    --shadow-card:0 1px 2px rgba(0,0,0,.08);
+    --shadow-card-hover:none;
   }
   html[data-theme=system] .orb-a{background:rgba(105,102,235,.16)}
   html[data-theme=system] .orb-b{background:rgba(147,103,221,.12)}
@@ -808,7 +808,6 @@ html[data-ambient=false] .ambient{display:none}
   .search-kbd{display:none}
   .workspace-header{flex-wrap:wrap;gap:10px}
   .heading{width:100%;flex-basis:100%}
-  .ghost-button{flex:none}
   .content-panel{padding:10px}
   .bookmarks{gap:8px}
   .card .more{opacity:1}
