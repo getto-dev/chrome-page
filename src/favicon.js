@@ -21,6 +21,8 @@ function renderFallback(container, title, host, url) {
   container.replaceChildren(fallback);
 }
 
+const MIN_FAVICON_SIZE = 24;
+
 export function attachFavicon(container, url, host, title = "") {
   container.replaceChildren();
 
@@ -33,6 +35,14 @@ export function attachFavicon(container, url, host, title = "") {
   image.alt = "";
   image.loading = "lazy";
   image.decoding = "async";
+  image.onload = () => {
+    const width = image.naturalWidth;
+    const height = image.naturalHeight;
+    if (!width || !height || width < MIN_FAVICON_SIZE || height < MIN_FAVICON_SIZE) {
+      renderFallback(container, title, host, url);
+    }
+  };
+  image.onerror = () => renderFallback(container, title, host, url);
 
   try {
     const faviconUrl = new URL(chrome.runtime.getURL("_favicon/"));
@@ -43,8 +53,6 @@ export function attachFavicon(container, url, host, title = "") {
     renderFallback(container, title, host, url);
     return;
   }
-
-  image.onerror = () => renderFallback(container, title, host, url);
   image.title = host || url;
   container.appendChild(image);
 }
