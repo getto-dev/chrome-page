@@ -8,7 +8,7 @@ const CARD_HEIGHT = { compact: 52, standard: 58, large: 68 };
 const state = {
   map: new Map(), rootId: "0", bookmarksBarId: null, settings: { ...DEFAULT_SETTINGS },
   currentFolderId: null, searchQuery: "", children: [], virtualStart: 0, virtualEnd: 0,
-  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false,
+  destroyed: false, refreshTimer: 0, refreshInFlight: null, renderFrame: 0, renderForce: false, searchTimer: 0,
   menuTargetId: null, menuTrigger: null, dialogResolver: null, dialogValidate: null, dialogReturnFocus: null,
   moveSourceId: null, moveDestinationId: null, resizeObserver: null
 };
@@ -208,6 +208,9 @@ function renderSidebar() {
     button.append(icon, name); row.appendChild(button);
     const more = document.createElement("button"); more.type = "button"; more.className = "more"; more.dataset.itemId = folder.id; more.setAttribute("aria-haspopup", "menu"); more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-label", "Действия папки «" + getDisplayFolderTitle(folder) + "»"); more.appendChild(createIcon("more")); row.appendChild(more); dom.folderTree.appendChild(row);
+    for (const child of folder.children || []) {
+      if (!child.url) addFolder(child);
+    }
   }
   roots.forEach(addFolder);
   if (!roots.length) {
@@ -480,7 +483,11 @@ function setupEvents() {
     if (button) { const key = button.closest("[data-setting]")?.dataset.setting; let value = button.dataset.value; if (key === "columns" && value !== "auto") value = Number(value); if (key) { state.settings[key] = value; void persistSettings(); } }
   });
 
-  dom.search.addEventListener("input", event => showSearch(event.target.value));
+  dom.search.addEventListener("input", event => {
+    clearTimeout(state.searchTimer);
+    const value = event.target.value;
+    state.searchTimer = setTimeout(() => showSearch(value), 80);
+  });
   dom.searchClear.addEventListener("click", () => { showSearch(""); dom.search.focus(); });
   dom.settingsButton.addEventListener("click", () => showSettings(dom.settingsPanel.classList.contains("hidden")));
   dom.managerButton.addEventListener("click", () => void chrome.tabs.create({ url: "chrome://bookmarks" }).catch(console.error));
@@ -523,5 +530,5 @@ function setupEvents() {
 }
 
 async function init() { state.settings = await loadSettings(); applyTheme(); applyVisualSettings(); setupEvents(); await refresh(); }
-window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
+window.addEventListener("beforeunload", () => { state.destroyed = true; clearTimeout(state.refreshTimer); clearTimeout(state.searchTimer); if (state.renderFrame) cancelAnimationFrame(state.renderFrame); state.resizeObserver?.disconnect(); });
 void init().catch(error => console.error("Chrome Page init failed:", error));

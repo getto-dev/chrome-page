@@ -240,7 +240,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 .folder-button:hover{background:var(--hover);color:var(--text)}
 .folder-button:active{transform:none}
-.folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.95;stroke:none}
+.folder-button>.icon{width:20px;height:20px;color:currentColor;opacity:.9}
 .folder-name{
   min-width:0;
   overflow:hidden;
@@ -391,7 +391,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   --favicon-size:32px;
   --title-size:13.5px;
   display:grid;
-  grid-template-columns:repeat(var(--auto-columns,3),minmax(var(--card-min-width),1fr));
+  grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));
   gap:var(--gap);
   align-content:start;
   contain:layout;
@@ -495,7 +495,6 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   color:var(--accent);
 }
 .folder-card .favicon .icon{width:32px;height:32px}
-.folder-card .folder-icon .icon{fill:none;stroke:none}
 
 .empty-message{
   grid-column:1/-1;
@@ -723,6 +722,8 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
   .shell{grid-template-columns:228px minmax(0,1fr)}
 }
 @media (max-width:850px){
+  .setting-item{align-items:flex-start;flex-direction:column;gap:8px}
+  .options{width:100%}
   .shell{
     grid-template-columns:1fr;
     grid-template-rows:auto minmax(0,1fr);
