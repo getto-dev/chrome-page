@@ -455,6 +455,7 @@ html[data-theme=dark] .orb-c{background:rgba(68,136,180,.065)}
 }
 .favicon img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
 .favicon-fallback{
+  --favicon-fallback-hue:240;
   display:grid;
   place-items:center;
   width:100%;
