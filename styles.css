@@ -273,51 +273,40 @@ html[data-ambient=false] .ambient{display:none}
 }
 .folder-button.active::before{background:var(--accent)}
 .folder-button.active>.icon{opacity:.92}
-.folder-row>.more{opacity:0}
-.folder-row:hover>.more,.folder-row>.more:focus-visible{opacity:1}
-
-.more{
+.folder-row>.more{
   flex:none;
   display:grid;
   place-items:center;
-  width:34px;
-  height:34px;
+  width:30px;
+  height:30px;
   border:1px solid transparent;
-  border-radius:10px;
-  background:rgba(var(--surface),.6);
+  border-radius:8px;
+  background:transparent;
   color:var(--muted);
   cursor:pointer;
-  transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition),box-shadow var(--transition);
+  transition:background var(--transition),border-color var(--transition),color var(--transition);
 }
 .more:hover{
-  background:rgba(var(--surface),.8);
+  background:var(--hover);
   border-color:var(--border);
   color:var(--text);
-  box-shadow:0 4px 12px rgba(25,30,45,.06);
 }
 .more:active{transform:scale(.94)}
 .more .icon{width:16px;height:16px}
 .card .more{
   position:absolute;
-  right:8px;
+  right:6px;
   top:50%;
   transform:translateY(-50%);
   z-index:2;
   opacity:0;
-  background:rgba(var(--surface),.86);
-  border-color:var(--border);
+  background:rgba(var(--surface),.76);
 }
 .card:hover .more,.card:focus-within .more,.card .more:focus-visible{opacity:1}
 .card .more:hover{
-  background:rgba(var(--surface),.98);
+  background:rgba(var(--surface),.92);
   border-color:var(--border-strong);
-  box-shadow:0 5px 14px rgba(25,30,45,.08);
 }
-.card .more:focus-visible{
-  opacity:1;
-}
-.card .more:active{transform:translateY(-50%) scale(.94)}
-
 .sidebar-footer{
   display:flex;
   justify-content:flex-end;
@@ -356,19 +345,19 @@ html[data-ambient=false] .ambient{display:none}
   align-items:center;
   gap:20px;
   justify-content:space-between;
-  min-height:80px;
-  padding:17px 20px 16px;
+  min-height:68px;
+  padding:13px 18px 11px;
   border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg,rgba(var(--surface),.5),rgba(var(--surface),.08));
-  box-shadow:0 1px 0 rgba(255,255,255,.035) inset;
+  background:transparent;
+  box-shadow:none;
 }
 .heading{min-width:0;flex:1}
 .heading h1{
   margin:0;
-  font-size:24px;
+  font-size:22px;
   line-height:1.15;
-  font-weight:780;
-  letter-spacing:-.045em;
+  font-weight:730;
+  letter-spacing:-.035em;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -376,10 +365,10 @@ html[data-ambient=false] .ambient{display:none}
 .breadcrumbs{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:5px;
   min-width:0;
-  margin-top:6px;
-  font-size:11px;
+  margin-top:4px;
+  font-size:10px;
   color:var(--muted);
   white-space:nowrap;
   overflow:hidden;
@@ -420,58 +409,47 @@ html[data-ambient=false] .ambient{display:none}
 .ghost-button:active{transform:translateY(1px) scale(.99)}
 .ghost-button .icon{width:15px;height:15px}
 
-.content-panel{flex:1;min-height:0;overflow:auto;padding:18px}
+.content-panel{flex:1;min-height:0;overflow:auto;padding:14px 16px 20px}
 .bookmarks{
   --auto-columns:3;
-  --card-min-width:220px;
-  --card-height:72px;
-  --favicon-size:38px;
+  --card-min-width:200px;
+  --card-height:64px;
+  --favicon-size:34px;
   --title-size:13.5px;
   display:grid;
   grid-template-columns:repeat(var(--auto-columns,3),minmax(0,1fr));
   gap:var(--gap);
+  align-content:start;
   contain:layout;
 }
-.bookmarks[data-spacing=compact]{--gap:10px}
-.bookmarks[data-spacing=standard]{--gap:14px}
-.bookmarks[data-spacing=large]{--gap:18px}
-.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:56px;--favicon-size:32px;--title-size:12.5px}
-.bookmarks[data-size=standard]{--card-min-width:220px;--card-height:72px;--favicon-size:38px;--title-size:13.5px}
-.bookmarks[data-size=large]{--card-min-width:300px;--card-height:88px;--favicon-size:44px;--title-size:14.5px}
-.bookmarks[data-radius=sharp]{--radius:10px}
-.bookmarks[data-radius=soft]{--radius:14px}
-.bookmarks[data-radius=round]{--radius:17px}
+.bookmarks[data-spacing=compact]{--gap:8px}
+.bookmarks[data-spacing=standard]{--gap:10px}
+.bookmarks[data-spacing=large]{--gap:14px}
+.bookmarks[data-size=compact]{--card-min-width:180px;--card-height:56px;--favicon-size:30px;--title-size:12.5px}
+.bookmarks[data-size=standard]{--card-min-width:200px;--card-height:64px;--favicon-size:34px;--title-size:13.5px}
+.bookmarks[data-size=large]{--card-min-width:260px;--card-height:80px;--favicon-size:40px;--title-size:14.5px}
+.bookmarks[data-radius=sharp]{--radius:8px}
+.bookmarks[data-radius=soft]{--radius:11px}
+.bookmarks[data-radius=round]{--radius:14px}
 
 .card{
   position:relative;
   height:var(--card-height);
   min-width:0;
   overflow:hidden;
-  isolation:isolate;
-  border:1px solid var(--border);
+  border:1px solid transparent;
   border-radius:var(--radius);
-  background:
-    linear-gradient(145deg,rgba(var(--surface),.9),rgba(var(--surface),.72));
-  box-shadow:var(--shadow-card),0 1px 0 var(--glass-highlight) inset;
-  transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition),background var(--transition);
-}
-.card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  border-radius:inherit;
-  border:1px solid rgba(255,255,255,.035);
+  background:rgba(var(--surface),.24);
+  box-shadow:none;
+  transition:background var(--transition),border-color var(--transition);
 }
 .card:hover{
-  transform:translateY(-2px);
-  border-color:var(--border-strong);
-  background:linear-gradient(145deg,rgba(var(--surface),.96),rgba(var(--surface),.8));
-  box-shadow:var(--shadow-card-hover);
+  background:rgba(var(--surface),.52);
+  border-color:var(--border);
 }
 .card:focus-within{
   border-color:var(--accent-border);
-  box-shadow:0 0 0 3px var(--accent-soft),var(--shadow-card-hover);
+  box-shadow:0 0 0 3px var(--accent-soft);
 }
 .card-link{
   display:flex;
@@ -495,22 +473,22 @@ html[data-ambient=false] .ambient{display:none}
   flex:none;
   width:var(--favicon-size);
   height:var(--favicon-size);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:12px;
-  background:rgba(var(--surface),.94);
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:rgba(var(--surface),.72);
   overflow:hidden;
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:-.03em;
+  font-size:10.5px;
+  font-weight:750;
+  letter-spacing:-.02em;
   color:var(--accent);
-  box-shadow:0 3px 10px rgba(0,0,0,.12),0 1px 0 rgba(255,255,255,.07) inset;
+  box-shadow:none;
 }
 .favicon img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .card-text{
   display:flex;
   flex-direction:column;
   justify-content:center;
-  gap:4px;
+  gap:3px;
   min-width:0;
   flex:1;
 }
@@ -540,7 +518,7 @@ html[data-ambient=false] .ambient{display:none}
 .card-meta[hidden]{display:none}
 .bookmark-card .favicon{color:var(--accent)}
 .folder-card .favicon{
-  background:linear-gradient(145deg,var(--accent-soft),rgba(var(--surface),.9));
+  background:var(--accent-soft);
   border-color:var(--accent-border);
   color:var(--accent);
 }
