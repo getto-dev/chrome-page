@@ -405,28 +405,6 @@ html[data-ambient=false] .ambient{display:none}
 .crumb.current{font-weight:620;color:var(--muted)}
 .breadcrumbs>span:not(.current){color:var(--muted-2)}
 
-.ghost-button{
-  display:flex;
-  align-items:center;
-  gap:7px;
-  border:1px solid var(--border-strong);
-  border-radius:9px;
-  background:var(--text);
-  padding:8px 11px;
-  color:rgb(var(--surface));
-  font-size:11px;
-  font-weight:650;
-  cursor:pointer;
-  transition:background var(--transition),border-color var(--transition),color var(--transition);
-}
-.ghost-button:hover{
-  border-color:var(--text);
-  background:var(--accent);
-  color:#fff;
-  box-shadow:none;
-}
-.ghost-button:active{transform:translateY(1px)}
-
 .content-panel{flex:1;min-height:0;overflow:auto;padding:12px 14px 18px}
 .bookmarks{
   --auto-columns:3;
